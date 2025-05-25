@@ -1,0 +1,17 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9095/realms/VDT
+
+server:
+  servlet:
+    session:
+      cookie:
+        domain: localhost
+
+jwt:
+  secret-key: 027e871dab986a9eebda0e8cf9c0f8e7a6a409e91a22cdd1665873622a65c8d0d47442f2e2a5fe45798dc5a3b59cc558dbe44c68813d11c7f7012cf1ae523da3c3eaf8588e54bf7837cce128611d7058b31796b0a099524d8646ce5bc86eb89463b0154fd13e02a4a9aa25100d48d5cc017dabd607d603fddc1e4dfbec819754
+  access-token-expiration: 30 #mins
+  refresh-token-expiration: 1440 # mins, 1 day

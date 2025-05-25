@@ -1,0 +1,37 @@
+CREATE DATABASE keycloak WITH OWNER = admin ENCODING = 'UTF8' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8' TABLESPACE = pg_default CONNECTION
+LIMIT = -1;
+--
+-- \c auth
+--
+-- create table users (
+--     id int primary key,
+--     username varchar(255) unique not null,
+--     "password" varchar(255) not null,
+--     full_name varchar(255) not null,
+--     email varchar(50) unique not null,
+--     avatar_url varchar(255) not null,
+--     created_at timestamp not null,
+--     updated_at timestamp
+-- )
+--
+-- create table roles(
+--     id int primary key,
+--     name varchar(50) unique not null,
+--     description varchar(255)
+-- )
+--
+-- create table permissions(
+--     id int primary key,
+--     name varchar(50) unique not null,
+--     description varchar(255)
+-- )
+--
+-- create table role_has_permissions(
+--     role_id int references roles(id),
+--     permission_id int references permissions(id)
+-- )
+--
+-- create table user_has_roles(
+--     role_id int references roles(id),
+--     user_id int references users(id)
+-- )
