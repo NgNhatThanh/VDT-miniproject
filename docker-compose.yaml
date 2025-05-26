@@ -29,6 +29,7 @@ services:
     ports:
       - "9095:8080"
     volumes:
+#      - ./identity/theme:/opt/keycloak/themes
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
     depends_on:
       - postgres
