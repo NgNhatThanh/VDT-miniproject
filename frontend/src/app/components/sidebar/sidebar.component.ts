@@ -51,7 +51,8 @@ export class SidebarComponent {
     {
       label: 'TÀI KHOẢN CỦA TÔI',
       children: [
-        { label: 'Đăng xuất', icon: 'logout', onClick: () => this.kcService.logout() }
+        { label: 'Đăng xuất', icon: 'logout', onClick: () => this.kcService.logout() },
+        { label: 'Hồ sơ cá nhân', icon: 'person', onClick: () => window.open('http://localhost:9095/realms/VDT/account') }
       ]
     }
   ];

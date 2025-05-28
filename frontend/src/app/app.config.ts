@@ -14,5 +14,5 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(kcFactory),
     provideZoneChangeDetection({ eventCoalescing: true }), 
     provideRouter(routes)
-  ]
+  ],
 };
