@@ -41,6 +41,7 @@ export class KeycloakService {
       this._profile = userInfo as UserProfile
       this._profile.token = this.keycloak.token;
       this._profile.username = userInfo.preferred_username
+      console.log(this._profile.token)
     }
 
   }
