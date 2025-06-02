@@ -32,7 +32,6 @@ export interface SidebarMenuItem {
     MatTreeModule
   ],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
 })
 export class SidebarComponent {
   kcService = inject(KeycloakService)
@@ -43,9 +42,7 @@ export class SidebarComponent {
       label: 'QUẢN LÝ LỊCH HỌP',
       children: [
         { label: 'Lịch họp cá nhân', icon: 'person', url: '/lich-hop-ca-nhan' },
-        { label: 'Lịch họp đơn vị', icon: 'apartment', url: '/lich-hop-don-vi' },
-        { label: 'Lịch họp yêu cầu', icon: 'pause_circle', url: '/lich-hop-yeu-cau' },
-        { label: 'Biểu quyết ngoài cuộc họp', icon: 'bar_chart', url: '/bieu-quyet-ngoai-cuoc-hop' }
+        { label: 'Tạo lịch họp', icon: 'add', url: '/them-cuoc-hop' }
       ]
     },
     {

@@ -1,0 +1,56 @@
+<div class="w-full max-w-4xl mx-auto">
+  <div class="flex items-center justify-between px-4 py-4 bg-white border-b border-gray-200">
+    <button mat-icon-button (click)="previousWeek()">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <h2 class="text-xl font-bold">{{ weekStart | date:'dd/MM/yyyy' }} - {{ weekEnd | date:'dd/MM/yyyy' }}</h2>
+    <button mat-icon-button (click)="nextWeek()">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab *ngFor="let status of meetingStatuses" [label]="status.label">
+      <div>
+        <ng-container *ngFor="let day of weekDays">
+          <div class="mb-6" *ngIf="getMeetingsByStatusAndDay(status.value, day).length > 0">
+            <div class="text-lg font-semibold text-gray-700 mb-3 border-b mt-3 pb-1">{{ formatDate(day) }}</div>
+            <a
+              mat-card
+              [routerLink]="['/chi-tiet-cuoc-hop', meeting.id]"
+              class="rounded-[10px] border border-gray-200 shadow-none mb-4 p-0 block transition hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+              *ngFor="let meeting of getMeetingsByStatusAndDay(status.value, day)"
+            >
+              
+              <div class="px-4 pt-2 pb-2">
+                <div class="flex items-center justify-between">
+                  <div class="text-base font-bold mb-1">{{ meeting.title }}</div>
+                  <div *ngIf="isOngoing(meeting)" class="bg-blue-500 text-white text-xs px-2 py-1 rounded shadow z-10">
+                    Đang diễn ra
+                  </div>
+                </div>
+                
+                <div class="text-sm text-gray-700 mb-3 line-clamp-1">{{ meeting.description }}</div>
+                <div class="flex items-center gap-2 mb-2">
+                  <mat-icon class="text-gray-500">access_time</mat-icon>
+                  <div class="text-sm">{{ formatTime(meeting.startTime) + ' ' + meeting.startTime.toLocaleDateString() }} - {{ formatTime(meeting.endTime) + ' ' + meeting.endTime.toLocaleDateString() }}</div>
+                </div>
+                <div class="flex items-center gap-2 mb-2">
+                  <mat-icon class="text-gray-500">location_on</mat-icon>
+                  <div class="text-sm">{{ meeting.location }}</div>
+                </div>
+              </div>
+              <div class="w-full flex items-center justify-center min-h-10">
+                <div class="w-full rounded-b-[10px] text-center text-base font-semibold py-2" [ngClass]="status.cssClass">{{ status.displayText }}</div>
+              </div>
+            </a>
+          </div>
+        </ng-container>
+        <div class="text-center text-gray-500 py-8" *ngIf="!hasMeetingsByStatus(status.value)">
+          Không có cuộc họp nào {{ status.displayText.toLowerCase() }}
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+

@@ -2,6 +2,7 @@ package org.vdt.qlch.meetingservice.model.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.vdt.commonlib.exception.BadRequestException;
 
 public enum MeetingJoinStatus {
 
@@ -28,6 +29,6 @@ public enum MeetingJoinStatus {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Invalid status: " + value);
+        throw new BadRequestException("Invalid status: " + value);
     }
 }

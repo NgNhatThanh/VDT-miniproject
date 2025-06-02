@@ -20,6 +20,7 @@
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
     "@tailwindcss/postcss": "^4.1.7",
+    "keycloak-angular": "^19.0.2",
     "keycloak-js": "^26.1.5",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.0",

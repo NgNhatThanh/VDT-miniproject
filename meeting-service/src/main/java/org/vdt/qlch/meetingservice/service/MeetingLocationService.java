@@ -10,6 +10,9 @@ import org.vdt.qlch.meetingservice.model.MeetingLocation;
 import org.vdt.qlch.meetingservice.repository.MeetingLocationRepository;
 import org.vdt.qlch.meetingservice.utils.Constants;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class MeetingLocationService {
@@ -29,4 +32,7 @@ public class MeetingLocationService {
         return LocationDTO.from(meetingLocation);
     }
 
+    public List<LocationDTO> getAll() {
+        return meetingLocationRepository.findAll().stream().map(LocationDTO::from).toList();
+    }
 }

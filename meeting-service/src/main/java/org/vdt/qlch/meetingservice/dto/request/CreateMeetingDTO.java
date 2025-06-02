@@ -1,5 +1,6 @@
 package org.vdt.qlch.meetingservice.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ public record CreateMeetingDTO(
         @NotNull LocalDateTime startTime,
         @NotNull LocalDateTime endTime,
         @NotNull Integer locationId,
-        @NotEmpty List<JoinDTO> joins,
+        @NotEmpty List<@Valid JoinDTO> joins,
         List<Integer> documentsIds
         ) {
 }

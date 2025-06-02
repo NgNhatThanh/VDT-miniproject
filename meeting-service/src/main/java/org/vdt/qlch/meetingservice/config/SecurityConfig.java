@@ -21,7 +21,9 @@ public class SecurityConfig {
 
     private final String[] ADMIN_APIS = {
         "/create",
-        "/location/add"
+        "/location/add",
+        "/location/all",
+        "/role/all"
     };
 
     @Bean

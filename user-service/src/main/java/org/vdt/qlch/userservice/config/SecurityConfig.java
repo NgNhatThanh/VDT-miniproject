@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class SecurityConfig {
 
     private final String[] ADMIN_APIS = {
-
+        "/all"
     };
 
     @Bean

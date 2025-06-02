@@ -7,19 +7,15 @@ export const HOME_ROUTES: Routes = [
         pathMatch: 'full'
     },
     {
+        path: 'them-cuoc-hop',
+        loadComponent: () => import('../add-meeting/add-meeting.component').then(m => m.AddMeetingComponent)
+    },
+    {
         path: 'lich-hop-ca-nhan',
-        loadComponent: () => import('../meeting/meeting.component').then(m => m.MeetingComponent)
+        loadComponent: () => import('../personal-meetings/personal-meetings.component').then(m => m.PersonalMeetingsComponent)
     },
     {
-        path: 'lich-hop-don-vi',
-        loadComponent: () => import('../meeting/meeting.component').then(m => m.MeetingComponent)
-    },
-    {
-        path: 'lich-hop-yeu-cau',
-        loadComponent: () => import('../meeting/meeting.component').then(m => m.MeetingComponent)
-    },
-    {
-        path: 'bieu-quyet-ngoai-cuoc-hop',
-        loadComponent: () => import('../meeting/meeting.component').then(m => m.MeetingComponent)
+        path: 'chi-tiet-cuoc-hop/:meetingId',
+        loadComponent: () => import('../meeting-details/meeting-details.component').then(m => m.MeetingDetailsComponent)
     }
 ]; 

@@ -18,3 +18,4 @@ eureka:
 vdt:
   services:
     user: http://localhost:9090/api/user
+    document: http://localhost:9090/api/document

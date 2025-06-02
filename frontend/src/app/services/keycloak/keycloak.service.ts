@@ -37,15 +37,16 @@ export class KeycloakService {
     })
 
     if(authenticated){
-      const userInfo = await this.keycloak.loadUserInfo() as { preferred_username: string }
+      const userInfo = await this.keycloak.loadUserInfo() as { preferred_username: string, sub: string }
       this._profile = userInfo as UserProfile
       this._profile.token = this.keycloak.token;
       this._profile.username = userInfo.preferred_username
+      this._profile.id = userInfo.sub
       console.log(this._profile.token)
     }
 
   }
-
+  
   login(){
     return this.keycloak.login();
   }

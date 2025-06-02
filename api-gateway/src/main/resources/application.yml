@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: api-gateway
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   cloud:
     gateway:
       mvc:
@@ -16,3 +19,5 @@ spring:
             uri: lb://user-service
             predicates:
               - Path=/api/user/**
+cors:
+  allowed-origins: '*'

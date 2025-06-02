@@ -3,4 +3,4 @@ spring:
     name: common-lib
 
 cors:
-  allowed-origins: *
+  allowed-origins: '*'

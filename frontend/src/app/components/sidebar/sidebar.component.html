@@ -26,10 +26,10 @@
                     (click)="item.onClick?.()"
                     routerLink="{{item.url}}"
                 >
-                  <div class="flex items-center justify-center">
+                  <div class="flex items-center ">
                     <mat-icon class="mr-2 " *ngIf="item.icon" [ngStyle]="{'color': item.color || ''}">{{item.icon}}</mat-icon>
                     <p
-                        [ngClass]="{'text-blue-600 font-semibold': router.url === item.url}"
+                        [ngClass]="{'text-blue-800 font-semibold': router.url === item.url}"
                         class="whitespace-normal break-words"
                     >
                       {{item.label}}

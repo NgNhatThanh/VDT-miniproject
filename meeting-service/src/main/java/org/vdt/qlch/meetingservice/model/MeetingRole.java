@@ -1,10 +1,8 @@
 package org.vdt.qlch.meetingservice.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.vdt.commonlib.model.AbstractAuditEntity;
-import org.vdt.qlch.meetingservice.model.enums.MeetingRoleEnum;
 
 import java.util.List;
 
@@ -12,13 +10,16 @@ import java.util.List;
 @Table(name = "meeting_roles")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MeetingRole extends AbstractAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private MeetingRoleEnum name;
+    private String name;
 
     private String description;
 

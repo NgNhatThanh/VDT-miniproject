@@ -7,7 +7,6 @@ import { HOME_ROUTES } from './home.routes';
   selector: 'app-home',
   imports: [SidebarComponent, RouterOutlet],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
 })
 export class HomeComponent {
   routes = HOME_ROUTES;

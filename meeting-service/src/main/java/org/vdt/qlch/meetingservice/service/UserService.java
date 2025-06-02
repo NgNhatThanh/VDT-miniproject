@@ -7,8 +7,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.vdt.commonlib.dto.RecordExistDTO;
 import org.vdt.qlch.meetingservice.config.ServiceUrlConfig;
-import org.vdt.qlch.meetingservice.dto.response.UserExistByIdDTO;
 
 import java.net.URI;
 import java.util.List;
@@ -30,13 +30,13 @@ public class UserService {
                 .path("/exist")
                 .buildAndExpand()
                 .toUri();
-        UserExistByIdDTO res = restClient.post()
+        RecordExistDTO res = restClient.post()
                 .uri(url)
                 .headers(h -> h.setBearerAuth(jwt))
                 .body(userIds)
                 .retrieve()
-                .body(UserExistByIdDTO.class);
-        return res != null && res.exists();
+                .body(RecordExistDTO.class);
+        return res != null && res.exist();
     }
 
 }
