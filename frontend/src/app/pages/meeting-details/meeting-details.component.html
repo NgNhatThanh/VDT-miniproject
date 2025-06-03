@@ -1,1 +1,43 @@
-<p>meeting-details works!</p>
+<mat-toolbar color="white" class="border-b shadow-none px-2">
+  <!-- Nút back -->
+  <button mat-icon-button routerLink="/lich-hop-ca-nhan" aria-label="Quay lại">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+
+  <!-- Tiêu đề -->
+  <span class="flex-1 text-center font-bold text-lg uppercase tracking-wide">
+    {{ meeting?.title || 'DEMO SẢN PHẨM SMART OFFICE' }}
+  </span>
+
+  <!-- Nút tham gia -->
+  <span *ngIf="isOngoing" class="flex items-center text-blue-500 text-sm mr-2">
+    <span class="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+    Đang diễn ra
+  </span>
+  <button
+    mat-raised-button
+    color="primary"
+    style="border-radius: 5px; color:white;; padding: 4px 10px; white-space: nowrap; min-width: 90px; margin: 0px 6px; background-color: #2b7fff;"
+    class="disabled:opacity-30"
+    [disabled]="!canJoinMeeting"
+    (click)="joinMeeting()"
+  >
+    Vào phòng họp
+  </button>
+</mat-toolbar>
+
+<!-- Tabs -->
+<nav mat-tab-nav-bar [tabPanel]="tabPanel" class="mt-2">
+  <a
+    mat-tab-link
+    *ngFor="let tab of tabs"
+    [routerLink]="tab.path"
+    routerLinkActive #rla="routerLinkActive"
+    [active]="rla.isActive"
+  >
+    {{ tab.name }}
+  </a>
+</nav>
+<mat-tab-nav-panel #tabPanel>
+  <router-outlet></router-outlet>
+</mat-tab-nav-panel>

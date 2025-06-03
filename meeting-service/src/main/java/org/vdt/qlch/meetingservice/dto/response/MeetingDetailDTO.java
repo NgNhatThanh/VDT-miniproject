@@ -9,6 +9,7 @@ import java.util.List;
 
 @Builder
 public record MeetingDetailDTO(
+        int id,
         String title,
         String description,
         LocalDateTime startTime,
@@ -19,6 +20,7 @@ public record MeetingDetailDTO(
 
     public static MeetingDetailDTO from(MeetingJoin join) {
         return MeetingDetailDTO.builder()
+                .id(join.getMeeting().getId())
                 .title(join.getMeeting().getTitle())
                 .description(join.getMeeting().getDescription())
                 .startTime(join.getMeeting().getStartTime())

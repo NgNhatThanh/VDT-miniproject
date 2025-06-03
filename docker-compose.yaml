@@ -36,6 +36,15 @@ services:
     networks:
       - qlch-network
 
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./db/redis:/data
+    networks:
+      - qlch-network
+
 networks:
   qlch-network:
     driver: bridge

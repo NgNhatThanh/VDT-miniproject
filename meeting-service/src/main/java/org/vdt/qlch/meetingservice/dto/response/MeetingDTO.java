@@ -11,8 +11,7 @@ public record MeetingDTO(
         String description,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        LocationDTO location,
-        int participantAmount
+        LocationDTO location
         ) {
 
         public static MeetingDTO from(Meeting meeting) {

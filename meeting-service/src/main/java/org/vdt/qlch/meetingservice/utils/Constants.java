@@ -12,6 +12,8 @@ public final class Constants {
         public static final String MEETING_ROLE_NOT_FOUND = "MEETING_ROLE_NOT_FOUND";
         public static final String STARTDATE_AFTER_ENDDATE_ERROR = "STARTDATE_AFTER_ENDDATE_ERROR";
         public static final String MEETING_NOT_FOUND = "MEETING_NOT_FOUND";
+        public static final String REJECT_WITH_NO_REASON_ERROR = "REJECT_WITH_NO_REASON_ERROR";
+        public static final String MEETING_JOIN_ERROR = "MEETING_JOIN_ERROR";
     }
 
     public final class MeetingRole{

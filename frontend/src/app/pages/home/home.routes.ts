@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { MEETING_DETAILS_ROUTES } from '../meeting-details/meeting-details.routes';
 
 export const HOME_ROUTES: Routes = [
     {
@@ -16,6 +17,7 @@ export const HOME_ROUTES: Routes = [
     },
     {
         path: 'chi-tiet-cuoc-hop/:meetingId',
-        loadComponent: () => import('../meeting-details/meeting-details.component').then(m => m.MeetingDetailsComponent)
+        loadComponent: () => import('../meeting-details/meeting-details.component').then(m => m.MeetingDetailsComponent),
+        children: MEETING_DETAILS_ROUTES
     }
 ]; 

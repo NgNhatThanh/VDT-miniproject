@@ -15,7 +15,7 @@ interface Meeting {
   startTime: Date;
   endTime: Date;
   location: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'authorized';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'DELEGATED';
 }
 
 interface MeetingStatus {
@@ -40,25 +40,25 @@ export class PersonalMeetingsComponent implements OnInit {
 
   meetingStatuses: MeetingStatus[] = [
     {
-      value: 'pending',
+      value: 'PENDING',
       label: 'Chưa xác nhận',
       displayText: 'Chưa xác nhận',
       cssClass: 'bg-yellow-100 text-orange-700'
     },
     {
-      value: 'accepted',
+      value: 'ACCEPTED',
       label: 'Xác nhận tham gia',
       displayText: 'Xác nhận tham gia',
       cssClass: 'bg-green-100 text-green-700'
     },
     {
-      value: 'rejected',
+      value: 'REJECTED',
       label: 'Không tham gia',
       displayText: 'Không tham gia',
       cssClass: 'bg-red-100 text-red-700'
     },
     {
-      value: 'authorized',
+      value: 'DELEGATED',
       label: 'Đã ủy quyền',
       displayText: 'Đã ủy quyền',
       cssClass: 'bg-blue-100 text-blue-700'
@@ -99,7 +99,7 @@ export class PersonalMeetingsComponent implements OnInit {
             startTime: new Date(meeting.startTime),
             endTime: new Date(meeting.endTime),
             location: meeting.location,
-            status: meeting.status.toLowerCase() as Meeting['status']
+            status: meeting.status as Meeting['status']
           }));
         },
         error: (error) => {
@@ -144,6 +144,32 @@ export class PersonalMeetingsComponent implements OnInit {
 
   isOngoing(meeting: Meeting): boolean {
     const now = new Date();
-    return now >= meeting.startTime && now <= meeting.endTime;
+    const start = new Date(meeting.startTime);
+    const end = new Date(meeting.endTime);
+    return now >= start && now <= end;
+  }
+
+  isUpcoming(meeting: Meeting): boolean {
+    const now = new Date();
+    const start = new Date(meeting.startTime);
+    const thirtyMinutesBefore = new Date(start.getTime() - 30 * 60 * 1000);
+    return now >= thirtyMinutesBefore && now < start;
+  }
+
+  isEnded(meeting: Meeting): boolean {
+    const now = new Date();
+    const end = new Date(meeting.endTime);
+    return now > end;
+  }
+
+  getMeetingStatus(meeting: Meeting): { text: string, class: string } {
+    if (this.isOngoing(meeting)) {
+      return { text: 'Đang diễn ra', class: 'bg-blue-500 text-white' };
+    } else if (this.isUpcoming(meeting)) {
+      return { text: 'Sắp diễn ra', class: 'bg-green-500 text-white' };
+    } else if (this.isEnded(meeting)) {
+      return { text: 'Đã kết thúc', class: 'bg-gray-500 text-white' };
+    }
+    return { text: '', class: '' };
   }
 }

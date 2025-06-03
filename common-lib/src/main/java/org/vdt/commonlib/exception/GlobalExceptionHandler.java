@@ -24,6 +24,13 @@ public class GlobalExceptionHandler {
         return handleBadRequest(ex, request);
     }
 
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorDTO> handleNotFoundException(NotFoundException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        String message = ex.getMessage();
+        return buildErrorResponse(status, message, null, ex, request, 404);
+    }
+
     private String getServletPath(WebRequest webRequest) {
         ServletWebRequest servletRequest = (ServletWebRequest) webRequest;
         return servletRequest.getRequest().getServletPath();

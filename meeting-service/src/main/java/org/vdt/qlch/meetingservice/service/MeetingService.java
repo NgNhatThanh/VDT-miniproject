@@ -6,15 +6,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vdt.commonlib.exception.BadRequestException;
 import org.vdt.commonlib.utils.AuthenticationUtil;
+import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
 import org.vdt.qlch.meetingservice.dto.request.CreateMeetingDTO;
 import org.vdt.qlch.meetingservice.dto.request.JoinDTO;
+import org.vdt.qlch.meetingservice.dto.request.JoinUpdateDTO;
 import org.vdt.qlch.meetingservice.dto.response.MeetingCardDTO;
 import org.vdt.qlch.meetingservice.dto.response.MeetingDTO;
 import org.vdt.qlch.meetingservice.dto.response.MeetingDetailDTO;
+import org.vdt.qlch.meetingservice.dto.response.UserDTO;
 import org.vdt.qlch.meetingservice.model.*;
 import org.vdt.qlch.meetingservice.model.enums.DocumentStatus;
 import org.vdt.qlch.meetingservice.model.enums.MeetingJoinStatus;
 import org.vdt.qlch.meetingservice.repository.*;
+import org.vdt.qlch.meetingservice.service.redis.MeetingRedisService;
 import org.vdt.qlch.meetingservice.utils.Constants;
 
 import java.time.LocalDate;
@@ -38,6 +42,8 @@ public class MeetingService {
     private final UserService userService;
 
     private final DocumentService documentService;
+
+    private final MeetingRedisService meetingRedisService;
 
     @Transactional
     public MeetingDTO createMeeting(@Valid CreateMeetingDTO dto) {
@@ -141,4 +147,40 @@ public class MeetingService {
         MeetingDetailDTO res = MeetingDetailDTO.from(join);
         return res;
     }
+
+    @Transactional
+    public MeetingDetailDTO updateJoin(@Valid JoinUpdateDTO dto) {
+        MeetingJoin join = meetingJoinRepository.findById(dto.joinId())
+                .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.MEETING_NOT_FOUND));
+        String userId = AuthenticationUtil.extractUserId();
+        if(!join.getUserId().equals(userId)){
+            throw new BadRequestException(Constants.ErrorCode.PARTICIPANT_NOT_FOUND);
+        }
+        MeetingJoinStatus status = MeetingJoinStatus.fromString(dto.status().toUpperCase());
+        if(status == MeetingJoinStatus.REJECTED){
+            if(dto.reason() == null || dto.reason().isEmpty())
+                throw new BadRequestException(Constants.ErrorCode.REJECT_WITH_NO_REASON_ERROR);
+            else
+                join.setRejectReason(dto.reason());
+        }
+        join.setStatus(status);
+        join.setUpdatedBy(userId);
+        join = meetingJoinRepository.save(join);
+        return MeetingDetailDTO.from(join);
+    }
+
+    public org.vdt.qlch.meetingservice.dto.response.JoinDTO joinMeeting(int meetingId) {
+        String userId = AuthenticationUtil.extractUserId();
+        MeetingJoin join = meetingJoinRepository.findByUserIdAndMeetingId(userId, meetingId);
+        if(join == null){
+            throw new BadRequestException(Constants.ErrorCode.PARTICIPANT_NOT_FOUND);
+        }
+        if(join.getStatus() != MeetingJoinStatus.ACCEPTED){
+            throw new BadRequestException(Constants.ErrorCode.MEETING_JOIN_ERROR);
+        }
+        UserDTO user = userService.getById(userId);
+        meetingRedisService.addUserOnline(OnlineUserDTO.from(join, user), meetingId);
+        return org.vdt.qlch.meetingservice.dto.response.JoinDTO.from(join);
+    }
+
 }

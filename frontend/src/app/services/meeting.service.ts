@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { KeycloakService } from './keycloak/keycloak.service';
 
 export interface MeetingResponse {
@@ -14,11 +15,50 @@ export interface MeetingResponse {
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'AUTHORIZED';
 }
 
+export interface Location {
+  id: number;
+  name: string;
+  description: string | null;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  description: string | null;
+}
+
+export interface JoinInfo {
+  id: number;
+  status: string;
+  roles: Role[];
+}
+
+export interface MeetingDetails {
+  id: number;
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  location: Location;
+  join: JoinInfo;
+}
+
+export interface JoinUpdateRequest {
+  joinId: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'DELEGATED';
+  reason?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class MeetingService {
   private baseUrl = 'http://localhost:9090/api/meeting';
+  private apiUrl = 'http://localhost:9090/api';
+  private meetingCache: Map<string, MeetingDetails> = new Map();
+  public lastRejectReason: string | null = null;
+  private currentMeetingSubject = new BehaviorSubject<MeetingDetails | null>(null);
+  public currentMeeting$ = this.currentMeetingSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -39,5 +79,44 @@ export class MeetingService {
         endDate: this.formatDate(endDate)
       }
     });
+  }
+
+  getMeetingDetails(meetingId: string): Observable<MeetingDetails> {
+    // Kiểm tra cache trước
+    const cachedMeeting = this.meetingCache.get(meetingId);
+    if (cachedMeeting) {
+      this.currentMeetingSubject.next(cachedMeeting);
+      return of(cachedMeeting);
+    }
+
+    // Nếu không có trong cache, gọi API
+    return this.http.get<MeetingDetails>(`${this.apiUrl}/meeting/${meetingId}`).pipe(
+      map(meeting => {
+        // Lưu vào cache
+        this.meetingCache.set(meetingId, meeting);
+        this.currentMeetingSubject.next(meeting);
+        return meeting;
+      }),
+      catchError(error => {
+        console.error('Error fetching meeting details:', error);
+        throw error;
+      })
+    );
+  }
+
+  updateMeetingJoin(request: JoinUpdateRequest): Observable<MeetingDetails> {
+    return this.http.post<MeetingDetails>(`${this.apiUrl}/meeting/join-update`, request).pipe(
+      map(meeting => {
+        // Cập nhật cache với thông tin meeting mới
+        const meetingId = meeting.id.toString();
+        this.meetingCache.set(meetingId, meeting);
+        this.currentMeetingSubject.next(meeting);
+        return meeting;
+      }),
+      catchError(error => {
+        console.error('Error updating meeting join:', error);
+        throw error;
+      })
+    );
   }
 } 

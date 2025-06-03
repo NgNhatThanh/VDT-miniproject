@@ -25,8 +25,10 @@
               <div class="px-4 pt-2 pb-2">
                 <div class="flex items-center justify-between">
                   <div class="text-base font-bold mb-1">{{ meeting.title }}</div>
-                  <div *ngIf="isOngoing(meeting)" class="bg-blue-500 text-white text-xs px-2 py-1 rounded shadow z-10">
-                    Đang diễn ra
+                  <div *ngIf="getMeetingStatus(meeting).text" 
+                       [ngClass]="getMeetingStatus(meeting).class"
+                       class="text-xs px-2 py-1 rounded shadow z-10">
+                    {{ getMeetingStatus(meeting).text }}
                   </div>
                 </div>
                 

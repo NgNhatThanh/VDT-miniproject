@@ -2,13 +2,21 @@ package org.vdt.qlch.meetingservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.vdt.commonlib.dto.RecordExistDTO;
+import org.vdt.commonlib.exception.BadRequestException;
+import org.vdt.commonlib.exception.NotFoundException;
 import org.vdt.qlch.meetingservice.config.ServiceUrlConfig;
+import org.vdt.qlch.meetingservice.dto.response.UserDTO;
+import org.vdt.qlch.meetingservice.utils.Constants;
 
 import java.net.URI;
 import java.util.List;
@@ -37,6 +45,30 @@ public class UserService {
                 .retrieve()
                 .body(RecordExistDTO.class);
         return res != null && res.exist();
+    }
+
+    public UserDTO getById(String userId){
+        final String jwt = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getTokenValue();
+        final URI url = UriComponentsBuilder
+                .fromUriString(serviceUrlConfig.user())
+                .path("/" + userId)
+                .buildAndExpand()
+                .toUri();
+        try{
+            ResponseEntity<UserDTO> res = restClient.get()
+                    .uri(url)
+                    .headers(h -> h.setBearerAuth(jwt))
+                    .retrieve()
+                    .toEntity(UserDTO.class);
+            return res.getBody();
+        }
+        catch(HttpClientErrorException e){
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND)
+                throw new NotFoundException(Constants.ErrorCode.PARTICIPANT_NOT_FOUND);
+            else
+                throw new BadRequestException(Constants.ErrorCode.PARTICIPANT_NOT_FOUND);
+        }
     }
 
 }

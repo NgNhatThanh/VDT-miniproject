@@ -2,10 +2,7 @@ package org.vdt.qlch.userservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vdt.commonlib.dto.RecordExistDTO;
 import org.vdt.qlch.userservice.dto.UserDTO;
 import org.vdt.qlch.userservice.service.UserService;
@@ -26,6 +23,11 @@ public class UserController {
     @GetMapping("/all")
     public ResponseEntity<List<UserDTO>> getAll(){
         return ResponseEntity.ok(userService.getAll());
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDTO> getById(@PathVariable String userId){
+        return ResponseEntity.ok(userService.getById(userId));
     }
 
 }

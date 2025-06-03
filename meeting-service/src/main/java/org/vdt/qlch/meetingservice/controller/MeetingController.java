@@ -2,9 +2,12 @@ package org.vdt.qlch.meetingservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.vdt.qlch.meetingservice.dto.request.CreateMeetingDTO;
+import org.vdt.qlch.meetingservice.dto.request.JoinUpdateDTO;
+import org.vdt.qlch.meetingservice.dto.response.JoinDTO;
 import org.vdt.qlch.meetingservice.dto.response.MeetingCardDTO;
 import org.vdt.qlch.meetingservice.dto.response.MeetingDTO;
 import org.vdt.qlch.meetingservice.dto.response.MeetingDetailDTO;
@@ -34,6 +37,16 @@ public class MeetingController {
     @GetMapping("/{meetingId}")
     public ResponseEntity<MeetingDetailDTO> getMeetingDetail(@PathVariable int meetingId){
         return ResponseEntity.ok(meetingService.getDetail(meetingId));
+    }
+
+    @PostMapping("/join-update")
+    public ResponseEntity<MeetingDetailDTO> joinUpdate(@RequestBody @Valid JoinUpdateDTO dto){
+        return ResponseEntity.ok(meetingService.updateJoin(dto));
+    }
+
+    @GetMapping("/join")
+    public ResponseEntity<JoinDTO> join(@RequestParam int meetingId){
+        return ResponseEntity.ok(meetingService.joinMeeting(meetingId));
     }
 
 }

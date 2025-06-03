@@ -3,13 +3,14 @@ package org.vdt.qlch.meetingservice.model.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.vdt.commonlib.exception.BadRequestException;
+import org.vdt.commonlib.utils.Constants;
 
 public enum MeetingJoinStatus {
 
-    PENDING("pending"),
-    ACCEPTED("accepted"),
-    REJECTED("rejected"),
-    AUTHORIZED("authorized");
+    PENDING("PENDING"),
+    ACCEPTED("ACCEPTED"),
+    REJECTED("REJECTED");
+//    DELEGATED("DELEGATED");
 
     private final String value;
 
@@ -29,6 +30,6 @@ public enum MeetingJoinStatus {
                 return type;
             }
         }
-        throw new BadRequestException("Invalid status: " + value);
+        throw new BadRequestException(Constants.ErrorCode.INVALID_ENUM_VALUE);
     }
 }

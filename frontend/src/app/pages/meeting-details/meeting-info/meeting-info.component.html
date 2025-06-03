@@ -1,0 +1,81 @@
+<div class="flex gap-5 p-4">
+    <div class="w-1/2">
+        <!-- Bên trái: Thông tin chung -->
+        <div class="meeting-info-left border border-blue-300" style="flex: 2; background: #fff; border-radius: 5px; padding: 20px; box-shadow: 0 2px 8px #0001;">
+            <h3 class="text-xl" style="color: #1976d2; margin-bottom: 16px;">Thông tin chung</h3>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <span style="font-size: 18px; font-weight: 500;">{{ meeting?.title }}</span>
+            </div>
+            <div class="flex items-center gap-2 mb-3">
+                <mat-icon>access_time</mat-icon>
+                <b>Thời gian:</b>
+                {{ meeting?.startTime | date:'HH:mm dd/MM/yy' }} - {{ meeting?.endTime | date:'HH:mm dd/MM/yy' }}
+            </div>
+            <div class="flex items-center gap-2">
+                <mat-icon>location_on</mat-icon>
+                <b>Địa điểm:</b>
+                <span matTooltip="{{ meeting?.location?.description }}" class="cursor-help">
+                    {{ meeting?.location?.name }}
+                </span>
+            </div>
+        </div>
+
+        <div class="meeting-info-left border border-blue-300 mt-5" style="flex: 2; background: #fff; border-radius: 5px; padding: 20px; box-shadow: 0 2px 8px #0001;">
+            <h3 class="text-xl" style="color: #1976d2; margin-bottom: 16px;">Nội dung cuộc họp</h3>
+            <div style="border-radius: 4px; min-height: 60px; margin-top: 4px; color: #333;">
+                {{ meeting?.description || 'Không có nội dung.' }}
+            </div>
+        </div>
+    </div>
+            
+    <div class="w-1/2">
+        <!-- Bên phải: Vai trò và xác nhận tham gia -->
+        <div class="meeting-info-right border border-blue-300 mb-5" style="border-radius: 5px; padding: 20px; box-shadow: 0 2px 8px #0001">
+            <div class="text-xl text-gray-600 mb-2">
+                Vai trò của bạn trong cuộc họp
+            </div>
+            <hr class="text-gray-300 mb-3"/>
+            <div class="flex items-center gap-2">
+                <mat-icon>person</mat-icon>
+                <p>
+                    {{getUserFullName()}}
+                </p>
+                <div 
+                    *ngFor="let role of meeting?.join?.roles"
+                    class="rounded-sm bg-blue-100 text-blue-600 px-2 py-1 text-sm"
+                >
+                    {{role.name}}
+                </div>
+            </div>
+        </div>
+
+        <div class="meeting-info-right border border-blue-300 flex gap-2 justify-between" style="border-radius: 5px; padding: 20px; box-shadow: 0 2px 8px #0001">
+            <div>
+                <div class="text-xl text-gray-600 mb-2">
+                    Xác nhận tham gia họp
+                </div>
+                <div class="text-sm text-gray-500">
+                    Bạn có tham dự cuộc họp này không?
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-2">
+                <button *ngIf="meeting?.join?.status !== 'ACCEPTED'" mat-flat-button color="primary"
+                    style="border-radius: 5px; font-size: small; padding: 4px 10px; white-space: nowrap; min-width: 90px; font-weight: 600;"
+                    (click)="onAcceptClick()">
+                    Tham dự
+                </button>
+                <button *ngIf="meeting?.join?.status !== 'REJECTED'" mat-stroked-button
+                    style="border-color: #f43f5e; color: #f43f5e; border-radius: 5px; font-size: small; padding: 4px 10px; white-space: nowrap; min-width: 90px; font-weight: 600;"
+                    (click)="onRejectClick()">
+                    Không tham dự
+                </button>
+                <button *ngIf="meeting?.join?.status !== 'DELEGATED'" mat-stroked-button color="accent"
+                    style="color: #10b981; border-color: #10b981; border-radius: 5px; font-size: small; padding: 4px 10px; white-space: nowrap; min-width: 90px; font-weight: 600;">
+                    Ủy quyền
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
