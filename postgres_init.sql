@@ -7,6 +7,9 @@ LIMIT = -1;
 CREATE DATABASE document WITH OWNER = admin ENCODING = 'UTF8' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8' TABLESPACE = pg_default CONNECTION
 LIMIT = -1;
 
+CREATE DATABASE meeting_history WITH OWNER = admin ENCODING = 'UTF8' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8' TABLESPACE = pg_default CONNECTION
+LIMIT = -1;
+
 \c meeting
 
 create table meetings
@@ -167,19 +170,18 @@ create table documents
     updated_by varchar
 );
 
--- create table vote_documents
--- (
---     id          integer generated always as identity
---         constraint vote_documents_pk
---             primary key,
---     status      varchar,
---     document_id integer
---         constraint vote_documents_documents_id_fk
---             references documents,
---     vote_id     integer not null,
---     approved_by varchar not null,
---     created_at  timestamp,
---     created_by  varchar,
---     updated_at  timestamp,
---     updated_by  varchar
--- );
+\c meeting_history
+
+create table meeting_histories
+(
+    id              integer generated always as identity
+        constraint meeting_histories_pk
+        primary key,
+    meeting_id      integer not null,
+    content         varchar,
+    type            varchar not null,
+    created_at      timestamp,
+    created_by      varchar,
+    updated_at      timestamp,
+    updated_by      varchar
+);

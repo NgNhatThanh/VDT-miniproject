@@ -14,6 +14,7 @@ public final class Constants {
         public static final String MEETING_NOT_FOUND = "MEETING_NOT_FOUND";
         public static final String REJECT_WITH_NO_REASON_ERROR = "REJECT_WITH_NO_REASON_ERROR";
         public static final String MEETING_JOIN_ERROR = "MEETING_JOIN_ERROR";
+        public static final String MEETING_ENDED_ERROR = "MEETING_ENDED_ERROR";
     }
 
     public final class MeetingRole{

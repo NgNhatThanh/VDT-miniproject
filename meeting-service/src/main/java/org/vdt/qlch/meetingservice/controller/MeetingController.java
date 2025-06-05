@@ -28,10 +28,9 @@ public class MeetingController {
     }
 
     @GetMapping("/get-for-user-calendar")
-    public ResponseEntity<List<MeetingCardDTO>> getMeetingForUser(@RequestParam String userId,
-                                                                  @RequestParam LocalDate startDate,
+    public ResponseEntity<List<MeetingCardDTO>> getMeetingForUser(@RequestParam LocalDate startDate,
                                                                   @RequestParam LocalDate endDate){
-        return ResponseEntity.ok(meetingService.getForUserCalendar(userId, startDate, endDate));
+        return ResponseEntity.ok(meetingService.getForUserCalendar(startDate, endDate));
     }
 
     @GetMapping("/{meetingId}")

@@ -9,3 +9,8 @@ spring:
 
 cors:
   allowed-origins: '*'
+
+vdt:
+  services:
+    user: ${gateway-url}/api/user
+    document: ${gateway-url}/api/document
