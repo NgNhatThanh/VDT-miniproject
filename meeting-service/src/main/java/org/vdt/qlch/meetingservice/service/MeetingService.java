@@ -12,10 +12,7 @@ import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
 import org.vdt.qlch.meetingservice.dto.request.CreateMeetingDTO;
 import org.vdt.qlch.meetingservice.dto.request.JoinDTO;
 import org.vdt.qlch.meetingservice.dto.request.JoinUpdateDTO;
-import org.vdt.qlch.meetingservice.dto.response.MeetingCardDTO;
-import org.vdt.qlch.meetingservice.dto.response.MeetingDTO;
-import org.vdt.qlch.meetingservice.dto.response.MeetingDetailDTO;
-import org.vdt.qlch.meetingservice.dto.response.UserDTO;
+import org.vdt.qlch.meetingservice.dto.response.*;
 import org.vdt.qlch.meetingservice.model.*;
 import org.vdt.qlch.meetingservice.model.enums.DocumentStatus;
 import org.vdt.qlch.meetingservice.model.enums.MeetingJoinStatus;
@@ -23,7 +20,6 @@ import org.vdt.qlch.meetingservice.producer.MeetingHistoryProducer;
 import org.vdt.qlch.meetingservice.repository.*;
 import org.vdt.qlch.meetingservice.service.redis.MeetingRedisService;
 import org.vdt.qlch.meetingservice.utils.Constants;
-import org.vdt.qlch.meetingservice.utils.KafkaUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,8 +44,6 @@ public class MeetingService {
     private final DocumentService documentService;
 
     private final MeetingRedisService meetingRedisService;
-
-    private final KafkaUtils kafkaUtils;
 
     private final MeetingHistoryProducer historyProducer;
 
@@ -184,10 +178,6 @@ public class MeetingService {
             throw new BadRequestException(Constants.ErrorCode.MEETING_ENDED_ERROR);
         }
         UserDTO user = userService.getById(userId);
-        String meetingTopic = String.format(org.vdt.commonlib.utils.Constants.MEETING_WS_TOPIC_FORMAT, meetingId);
-        if(!kafkaUtils.topicExists(meetingTopic)){
-            kafkaUtils.createTopic(meetingTopic);
-        }
         String fullName = user.lastName() + " " + user.firstName();
         historyProducer.send(MeetingHistoryMessage.builder()
                         .meetingId(meetingId)
@@ -196,6 +186,35 @@ public class MeetingService {
                         .build());
         meetingRedisService.addUserOnline(OnlineUserDTO.from(join, user), meetingId);
         return org.vdt.qlch.meetingservice.dto.response.JoinDTO.from(join);
+    }
+
+    public MeetingHeaderInfoDTO getHeaderInfo(int meetingId) {
+        String userId = AuthenticationUtil.extractUserId();
+        MeetingJoin join = meetingJoinRepository.findByUserIdAndMeetingId(userId, meetingId);
+        if(join == null){
+            throw new BadRequestException(Constants.ErrorCode.PARTICIPANT_NOT_FOUND);
+        }
+        if(join.getStatus() != MeetingJoinStatus.ACCEPTED){
+            throw new BadRequestException(Constants.ErrorCode.MEETING_JOIN_ERROR);
+        }
+        if(join.getMeeting().getEndTime().isBefore(LocalDateTime.now())){
+            throw new BadRequestException(Constants.ErrorCode.MEETING_ENDED_ERROR);
+        }
+        MeetingDTO meetingInfo = MeetingDTO.from(join.getMeeting());
+        Set<OnlineUserDTO> onlineUsers = meetingRedisService.getUserOnlineList(meetingId);
+        return new MeetingHeaderInfoDTO(meetingInfo, onlineUsers.stream().toList());
+    }
+
+    public void leaveMeeting(String userId, int meetingId) {
+        OnlineUserDTO user = meetingRedisService.removeUserOnline(userId, meetingId);
+        if(user == null){
+            throw new BadRequestException(Constants.ErrorCode.PARTICIPANT_NOT_FOUND);
+        }
+        historyProducer.send(MeetingHistoryMessage.builder()
+                .meetingId(meetingId)
+                .content(user.fullName() + " đã rời cuộc họp")
+                .type(MeetingHistoryType.USER_LEFT)
+                .build());
     }
 
 }

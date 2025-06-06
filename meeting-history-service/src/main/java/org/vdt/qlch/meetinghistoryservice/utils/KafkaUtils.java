@@ -2,6 +2,9 @@ package org.vdt.qlch.meetinghistoryservice.utils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.ListTopicsResult;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
@@ -20,6 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class KafkaUtils {
 
+    private final String uniqId = UUID.randomUUID().toString();
+
+    private final AdminClient adminClient;
+
     private final Map<String,
             ConcurrentMessageListenerContainer<String, MeetingHistoryMessage>> activeContainers = new ConcurrentHashMap<>();
 
@@ -33,47 +40,47 @@ public class KafkaUtils {
         System.out.println("Dynamic Listener - Topic: " + data.topic() + ", Partition: " + data.partition() + ", Offset: " + data.offset() + ", Message: " + data.value());
     };
 
-    public void subscribeTopics(String listenerId, String topic) {
-        unsubscribe(listenerId);
-
-        System.out.println("Attempting to subscribe listener '" + listenerId + "' to topic: " + topic);
-
+    public void subscribeTopics(String topic) {
+        String groupId = topic + "-" + uniqId;
         ContainerProperties containerProperties = new ContainerProperties(topic);
         containerProperties.setMessageListener(myMessageListener);
-        containerProperties.setGroupId(listenerId);
-
-        // Tạo một ConcurrentMessageListenerContainer mới
+        containerProperties.setGroupId(groupId);
         ConcurrentMessageListenerContainer<String, MeetingHistoryMessage> container =
                 new ConcurrentMessageListenerContainer<>(consumerFactory, containerProperties);
-
-        // Đăng ký container vào registry (không bắt buộc nhưng hữu ích để quản lý)
 //         registry.registerListenerContainer(container, true); // ID trong registry là listenerId
-
-        // Khởi tạo container (quan trọng để nó bắt đầu poll tin nhắn)
-        container.setBeanName("dynamicListener-" + listenerId); // Đặt tên bean để dễ debug
-//        container.;
-
-        // Bắt đầu container
+        container.setBeanName(groupId); // Đặt tên bean để dễ debug
         container.start();
-        activeContainers.put(listenerId, container);
-        System.out.println("Listener '" + listenerId + "' subscribed and started.");
+        activeContainers.put(groupId, container);
     }
 
-    public void unsubscribe(String listenerId) {
+    public void unsubscribe(String topic) {
+        String groupId = topic + "-" + uniqId;
         ConcurrentMessageListenerContainer<String, MeetingHistoryMessage> container =
-                activeContainers.get(listenerId);
+                activeContainers.get(groupId);
         if (container != null) {
-            System.out.println("Attempting to unsubscribe listener '" + listenerId + "'");
             container.stop();
-            activeContainers.remove(listenerId);
-            System.out.println("Listener '" + listenerId + "' stopped and unsubscribed.");
+            activeContainers.remove(groupId);
         } else {
-            System.out.println("Listener '" + listenerId + "' not found or already stopped.");
+            System.out.println("Listener '" + groupId + "' not found or already stopped.");
         }
     }
 
-    public Set<String> getActiveListenerIds() {
-        return activeContainers.keySet();
+    public boolean topicExists(String topic) {
+        try{
+            ListTopicsResult listTopicsResult = adminClient.listTopics();
+            return listTopicsResult.names().get()
+                    .stream().anyMatch(n -> n.equals(topic));
+        }
+        catch (Exception e){
+            log.error(e.getMessage());
+            return false;
+        }
+    }
+
+    public void createTopic(String topic){
+        NewTopic newTopic = new NewTopic(topic, 3, (short) 1);
+        adminClient.createTopics(List.of(newTopic));
+        log.info("Topic created: {}",topic);
     }
 
 }

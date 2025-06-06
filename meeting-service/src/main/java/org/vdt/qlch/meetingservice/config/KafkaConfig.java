@@ -1,24 +1,28 @@
 package org.vdt.qlch.meetingservice.config;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.vdt.commonlib.dto.MeetingLeaveMessage;
+import org.vdt.commonlib.utils.Constants;
+import org.vdt.qlch.meetingservice.service.MeetingService;
 
 import java.util.Properties;
 
 @Configuration
+@RequiredArgsConstructor
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+    private final MeetingService meetingService;
 
-    @Bean
-    public AdminClient adminClient(){
-        Properties props = new Properties();
-        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        return AdminClient.create(props);
+    @KafkaListener(topics = Constants.MEETING_LEAVE_TOPIC,
+            groupId = Constants.MEETING_LEAVE_GROUP)
+    public void listenUserLeave(MeetingLeaveMessage message){
+        meetingService.leaveMeeting(message.userId(), message.meetingId());
     }
 
 }

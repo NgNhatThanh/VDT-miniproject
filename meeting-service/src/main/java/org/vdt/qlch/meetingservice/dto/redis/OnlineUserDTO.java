@@ -22,4 +22,15 @@ public record OnlineUserDTO(
                 .build();
     }
 
+    public int hashCode(){
+        return id().hashCode();
+    }
+
+    public boolean equals(Object obj){
+        if(obj instanceof OnlineUserDTO){
+            return this.id().equals(((OnlineUserDTO)obj).id());
+        }
+        return false;
+    }
+
 }

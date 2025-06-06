@@ -6,6 +6,3 @@ server:
 spring:
   application:
     name: meeting-history-service
-
-cors:
-  allowed-origins: '*'

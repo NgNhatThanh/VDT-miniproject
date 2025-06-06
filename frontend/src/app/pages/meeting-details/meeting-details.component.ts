@@ -85,7 +85,6 @@ export class MeetingDetailsComponent implements OnInit {
   }
 
   joinMeeting() {
-    // TODO: Thực hiện logic tham gia phòng họp ở đây
-    alert('Chức năng vào phòng họp sẽ được bổ sung sau!');
+    window.location.assign(`/cuoc-hop/${this.meeting?.id}`);
   }
 }

@@ -8,7 +8,10 @@ import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +23,7 @@ public class MeetingRedisService {
     private final String MEETING_ONLINE_USERS_PREFIX = "meeting-online-users-";
 
     public void addUserOnline(OnlineUserDTO user, int meetingId){
-        List<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
+        Set<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
         onlineUsers.add(user);
         try{
             redisTemplate.opsForValue().set(MEETING_ONLINE_USERS_PREFIX + meetingId,
@@ -31,11 +34,14 @@ public class MeetingRedisService {
         }
     }
 
-    public void removeUserOnline(String userId, int meetingId){
-        List<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
+    public OnlineUserDTO removeUserOnline(String userId, int meetingId){
+        Set<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
+        OnlineUserDTO user = onlineUsers.stream()
+                .filter(u -> u.id().equals(userId))
+                .findFirst().orElse(null);
         onlineUsers = onlineUsers.stream()
                 .filter(u -> !u.id().equals(userId))
-                .toList();
+                .collect(Collectors.toSet());
         try{
             redisTemplate.opsForValue().set(MEETING_ONLINE_USERS_PREFIX + meetingId,
                     onlineUsers, Duration.ofMinutes(120));
@@ -43,21 +49,22 @@ public class MeetingRedisService {
         catch (Exception e){
             log.error(e.getMessage());
         }
+        return user;
     }
 
-    public List<OnlineUserDTO> getUserOnlineList(int meetingId){
+    public Set<OnlineUserDTO> getUserOnlineList(int meetingId){
         try{
-            List<OnlineUserDTO> onlineUsers = (List<OnlineUserDTO>) redisTemplate.opsForValue()
+            Set<OnlineUserDTO> onlineUsers = (Set<OnlineUserDTO>) redisTemplate.opsForValue()
                     .get(MEETING_ONLINE_USERS_PREFIX + meetingId);
             if(onlineUsers == null){
-                onlineUsers = new ArrayList<>();
+                onlineUsers = new HashSet<>();
             }
             return onlineUsers;
         }
         catch (Exception e){
             log.error(e.getMessage());
         }
-        return new ArrayList<>();
+        return new HashSet<>();
     }
 
 }

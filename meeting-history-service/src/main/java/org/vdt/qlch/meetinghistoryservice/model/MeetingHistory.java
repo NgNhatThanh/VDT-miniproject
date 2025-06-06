@@ -2,6 +2,7 @@ package org.vdt.qlch.meetinghistoryservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.vdt.commonlib.model.AbstractAuditEntity;
 import org.vdt.commonlib.model.MeetingHistoryType;
 
@@ -11,7 +12,7 @@ import org.vdt.commonlib.model.MeetingHistoryType;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class MeetingHistory extends AbstractAuditEntity {
 
     @Id

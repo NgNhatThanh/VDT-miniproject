@@ -31,5 +31,4 @@ public final class AuthenticationUtil {
     public static Authentication getAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();
     }
-
 }
