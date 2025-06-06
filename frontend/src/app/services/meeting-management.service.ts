@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { KeycloakService } from './keycloak/keycloak.service';
-import { filter } from 'rxjs/operators';
+import { filter, tap } from 'rxjs/operators';
 import * as Stomp from 'stompjs';
 
 export interface MeetingManagement {
@@ -33,12 +33,44 @@ export interface MeetingJoinResponse {
   roles: MeetingRole[];
 }
 
+export interface Location {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface MeetingInfo {
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  location: Location;
+}
+
+export interface OnlineUser {
+  id: string;
+  fullName: string;
+  picture: string;
+  join: {
+    id: number;
+    status: string;
+    roles: MeetingRole[];
+  };
+}
+
+export interface MeetingHeaderInfo {
+  info: MeetingInfo;
+  onlineUsers: OnlineUser[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class MeetingManagementService {
   private apiUrl = `${environment.apiUrl}/meeting-management`;
   private currentMeetingJoinInfo: MeetingJoinResponse | null = null;
+  private meetingJoinStatus = new BehaviorSubject<boolean>(false);
+  public meetingJoinStatus$ = this.meetingJoinStatus.asObservable();
 
   // STOMP Client
   private stompClient: Stomp.Client | null = null;
@@ -105,17 +137,38 @@ export class MeetingManagementService {
   // Kiểm tra quyền tham gia meeting
   checkMeetingJoinPermission(meetingId: number): Observable<MeetingJoinResponse> {
     const url = `http://localhost:9090/api/meeting/join?meetingId=${meetingId}`;
-    return this.http.get<MeetingJoinResponse>(url);
+    return this.http.get<MeetingJoinResponse>(url).pipe(
+      tap(response => {
+        if (!this.currentMeetingJoinInfo) {
+          this.currentMeetingJoinInfo = response;
+          this.meetingJoinStatus.next(true);
+        }
+      })
+    );
   }
 
   // Lưu thông tin quyền tham gia meeting
   setCurrentMeetingJoinInfo(info: MeetingJoinResponse) {
-    this.currentMeetingJoinInfo = info;
+    if (!this.currentMeetingJoinInfo) {
+      this.currentMeetingJoinInfo = info;
+      this.meetingJoinStatus.next(true);
+    }
+  }
+
+  // Reset trạng thái join meeting
+  resetMeetingJoinStatus() {
+    this.currentMeetingJoinInfo = null;
+    this.meetingJoinStatus.next(false);
   }
 
   // Lấy thông tin quyền tham gia meeting hiện tại
   getCurrentMeetingJoinInfo(): MeetingJoinResponse | null {
     return this.currentMeetingJoinInfo;
+  }
+
+  // Lấy thông tin header của cuộc họp
+  getMeetingHeaderInfo(meetingId: number): Observable<MeetingHeaderInfo> {
+    return this.http.get<MeetingHeaderInfo>(`http://localhost:9090/api/meeting/header-info?meetingId=${meetingId}`);
   }
 
   // ===== STOMP methods =====

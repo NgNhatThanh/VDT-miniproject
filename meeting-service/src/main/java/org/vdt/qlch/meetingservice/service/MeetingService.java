@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vdt.commonlib.dto.MeetingHistoryMessage;
+import org.vdt.commonlib.dto.RecordExistDTO;
 import org.vdt.commonlib.exception.BadRequestException;
 import org.vdt.commonlib.model.MeetingHistoryType;
 import org.vdt.commonlib.utils.AuthenticationUtil;
@@ -217,4 +218,9 @@ public class MeetingService {
                 .build());
     }
 
+    public RecordExistDTO checkJoin(int meetingId) {
+        String userId = AuthenticationUtil.extractUserId();
+        MeetingJoin join = meetingJoinRepository.findByUserIdAndMeetingId(userId, meetingId);
+        return new RecordExistDTO(join != null && join.getStatus() != MeetingJoinStatus.REJECTED);
+    }
 }

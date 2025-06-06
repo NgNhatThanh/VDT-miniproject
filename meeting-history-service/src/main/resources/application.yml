@@ -6,3 +6,7 @@ server:
 spring:
   application:
     name: meeting-history-service
+
+vdt:
+  services:
+    meeting: ${gateway-url}/api/meeting

@@ -33,3 +33,5 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+gateway-url: http://localhost:9090

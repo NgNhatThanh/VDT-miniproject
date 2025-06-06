@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.vdt.commonlib.dto.RecordExistDTO;
 import org.vdt.qlch.meetingservice.dto.request.CreateMeetingDTO;
 import org.vdt.qlch.meetingservice.dto.request.JoinUpdateDTO;
 import org.vdt.qlch.meetingservice.dto.response.*;
@@ -37,6 +38,11 @@ public class MeetingController {
     @PostMapping("/join-update")
     public ResponseEntity<MeetingDetailDTO> joinUpdate(@RequestBody @Valid JoinUpdateDTO dto){
         return ResponseEntity.ok(meetingService.updateJoin(dto));
+    }
+
+    @GetMapping("/check-join")
+    public ResponseEntity<RecordExistDTO> checkJoin(@RequestParam int meetingId){
+        return ResponseEntity.ok(meetingService.checkJoin(meetingId));
     }
 
     @GetMapping("/join")

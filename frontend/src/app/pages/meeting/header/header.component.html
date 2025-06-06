@@ -1,1 +1,37 @@
-<p>header works!</p>
+<div class="flex justify-between items-center py-2 px-4 bg-white shadow-md">
+  <!-- Nút rời cuộc họp -->
+  <button 
+  mat-raised-button 
+  style="border-radius: 5px; background-color:azure;"
+  color="warn" (click)="openLeaveModal()" class="flex items-center gap-2 h-9">
+    <mat-icon class="text-lg">exit_to_app</mat-icon>
+    Rời cuộc họp
+  </button>
+
+  <!-- Thông tin cuộc họp -->
+  <div class="flex-1 mx-8" *ngIf="meetingInfo">
+    <h1 class="text-lg font-semibold mb-1">{{ meetingInfo.info.title }}</h1>
+    <div class="flex gap-6 text-sm text-gray-600">
+      <div class="flex items-center gap-2">
+        <mat-icon style="color: blue">schedule</mat-icon>
+        <span>{{ formatDateTime(meetingInfo.info.startTime) }} - {{ formatDateTime(meetingInfo.info.endTime) }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <mat-icon style="color: blue">location_on</mat-icon>
+        <span>{{ meetingInfo.info.location.name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nút hiển thị danh sách người tham gia -->
+  <button 
+    style="border-radius: 5px; background-color:azure;"
+    mat-raised-button 
+    color="primary" 
+    (click)="openParticipantsModal()" 
+    class="flex items-center gap-2 h-9"
+  >
+    <mat-icon class="text-lg">people</mat-icon>
+    Đang tham gia
+  </button>
+</div>

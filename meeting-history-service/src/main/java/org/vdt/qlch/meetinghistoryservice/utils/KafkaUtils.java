@@ -6,7 +6,6 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
@@ -14,6 +13,10 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.stereotype.Component;
 import org.vdt.commonlib.dto.MeetingHistoryMessage;
+import org.vdt.commonlib.utils.Constants;
+import org.vdt.qlch.meetinghistoryservice.model.MeetingHistory;
+import org.vdt.qlch.meetinghistoryservice.producer.HistoryWSProducer;
+import org.vdt.qlch.meetinghistoryservice.service.MeetingHistoryService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +35,22 @@ public class KafkaUtils {
 
     private final KafkaListenerEndpointRegistry registry;
 
-    private final ConcurrentKafkaListenerContainerFactory<String, MeetingHistoryMessage> kafkaListenerContainerFactory;
-
     private final ConsumerFactory<String, MeetingHistoryMessage> consumerFactory;
+
+    private final MeetingHistoryService meetingHistoryService;
+
+    private final HistoryWSProducer producer;
+
+    @KafkaListener(topics = Constants.NEW_MEETING_HISTORY_TOPIC,
+            groupId = Constants.NEW_MEETING_HISTORY_GROUP)
+    private void newEventListener(MeetingHistoryMessage message) {
+        String topic = String.format(Constants.MEETING_WS_TOPIC_FORMAT, message.meetingId());
+        MeetingHistory history = meetingHistoryService.save(message);
+        if(!topicExists(topic)){
+            createTopic(topic);
+        }
+        producer.send(history);
+    }
 
     private final MessageListener<String, MeetingHistoryMessage> myMessageListener = (data) -> {
         System.out.println("Dynamic Listener - Topic: " + data.topic() + ", Partition: " + data.partition() + ", Offset: " + data.offset() + ", Message: " + data.value());
