@@ -1,16 +1,16 @@
-<div class="flex flex-col h-screen">
+<div class="flex flex-col h-screen bg-gray-100">
   <app-header class="flex-none min-h-[60px] border-b border-gray-300"></app-header>
-  <div class="flex flex-1 min-h-0">
+  <div class="flex min-h-0">
     <div class="flex flex-col w-[260px] min-w-[200px] border-r border-gray-300">
-      <app-manage-section class="flex-none min-h-[100px] max-h-[120px] border-b border-gray-300"></app-manage-section>
-      <app-history-section class="flex-1 min-h-0"></app-history-section>
+      <app-manage-section class="flex-none border-b border-gray-300"></app-manage-section>
+      <app-history-section class="flex-1 min-h-0 h-full"></app-history-section>
     </div>
-    <div class="flex flex-col flex-1 min-w-0 p-4 gap-4">
-      <div class="flex flex-row gap-4 min-h-[200px]">
+    <div class="flex flex-col flex-1 min-w-0 p-2 gap-2 h-full">
+      <div class="flex flex-row gap-2 h-1/2">
         <app-document-section class="flex-[2_1_0%] min-w-0 border border-gray-300"></app-document-section>
         <app-speech-section class="flex-1 min-w-0 border border-gray-300"></app-speech-section>
       </div>
-      <app-vote-section class="flex-1 min-h-[200px] border border-gray-300"></app-vote-section>
+      <app-vote-section class="h-1/2 border border-gray-300 rounded-sm"></app-vote-section>
     </div>
   </div>
 </div>

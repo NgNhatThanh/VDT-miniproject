@@ -15,38 +15,38 @@
         <ng-container *ngFor="let day of weekDays">
           <div class="mb-6" *ngIf="getMeetingsByStatusAndDay(status.value, day).length > 0">
             <div class="text-lg font-semibold text-gray-700 mb-3 border-b mt-3 pb-1">{{ formatDate(day) }}</div>
-            <a
-              mat-card
-              [routerLink]="['/chi-tiet-cuoc-hop', meeting.id]"
-              class="rounded-[10px] border border-gray-200 shadow-none mb-4 p-0 block transition hover:shadow-lg hover:-translate-y-1 cursor-pointer"
-              *ngFor="let meeting of getMeetingsByStatusAndDay(status.value, day)"
-            >
-              
-              <div class="px-4 pt-2 pb-2">
-                <div class="flex items-center justify-between">
-                  <div class="text-base font-bold mb-1">{{ meeting.title }}</div>
-                  <div *ngIf="getMeetingStatus(meeting).text" 
-                       [ngClass]="getMeetingStatus(meeting).class"
-                       class="text-xs px-2 py-1 rounded shadow z-10">
-                    {{ getMeetingStatus(meeting).text }}
+              <a
+                mat-card
+                [routerLink]="['/chi-tiet-cuoc-hop', meeting.id]"
+                class="rounded-[10px] border border-gray-200 shadow-none mb-4 p-0 block transition hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+                *ngFor="let meeting of getMeetingsByStatusAndDay(status.value, day)"
+              >
+                
+                <div class="px-4 pt-2 pb-2">
+                  <div class="flex items-center justify-between">
+                    <div class="text-base font-bold mb-1">{{ meeting.title }}</div>
+                    <div *ngIf="getMeetingStatus(meeting).text" 
+                        [ngClass]="getMeetingStatus(meeting).class"
+                        class="text-xs px-2 py-1 rounded shadow z-10">
+                      {{ getMeetingStatus(meeting).text }}
+                    </div>
+                  </div>
+                  
+                  <div class="text-sm text-gray-700 mb-3 line-clamp-1">{{ meeting.description }}</div>
+                  <div class="flex items-center gap-2 mb-2">
+                    <mat-icon class="text-gray-500">access_time</mat-icon>
+                    <div class="text-sm">{{ formatTime(meeting.startTime) + ' ' + meeting.startTime.toLocaleDateString() }} - {{ formatTime(meeting.endTime) + ' ' + meeting.endTime.toLocaleDateString() }}</div>
+                  </div>
+                  <div class="flex items-center gap-2 mb-2">
+                    <mat-icon class="text-gray-500">location_on</mat-icon>
+                    <div class="text-sm">{{ meeting.location }}</div>
                   </div>
                 </div>
-                
-                <div class="text-sm text-gray-700 mb-3 line-clamp-1">{{ meeting.description }}</div>
-                <div class="flex items-center gap-2 mb-2">
-                  <mat-icon class="text-gray-500">access_time</mat-icon>
-                  <div class="text-sm">{{ formatTime(meeting.startTime) + ' ' + meeting.startTime.toLocaleDateString() }} - {{ formatTime(meeting.endTime) + ' ' + meeting.endTime.toLocaleDateString() }}</div>
+                <div class="w-full flex items-center justify-center min-h-10">
+                  <div class="w-full rounded-b-[10px] text-center text-base font-semibold py-2" [ngClass]="status.cssClass">{{ status.displayText }}</div>
                 </div>
-                <div class="flex items-center gap-2 mb-2">
-                  <mat-icon class="text-gray-500">location_on</mat-icon>
-                  <div class="text-sm">{{ meeting.location }}</div>
-                </div>
-              </div>
-              <div class="w-full flex items-center justify-center min-h-10">
-                <div class="w-full rounded-b-[10px] text-center text-base font-semibold py-2" [ngClass]="status.cssClass">{{ status.displayText }}</div>
-              </div>
-            </a>
-          </div>
+              </a>
+            </div>
         </ng-container>
         <div class="text-center text-gray-500 py-8" *ngIf="!hasMeetingsByStatus(status.value)">
           Không có cuộc họp nào {{ status.displayText.toLowerCase() }}

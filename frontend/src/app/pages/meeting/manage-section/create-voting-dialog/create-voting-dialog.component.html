@@ -1,0 +1,116 @@
+<div class="flex items-center p-6 pb-2">
+   <h2 class="text-xl font-medium text-gray-800">Tạo biểu quyết mới</h2> 
+</div>
+
+<mat-dialog-content>
+  <form [formGroup]="votingForm" class="flex flex-col space-y-4">
+    <!-- Tiêu đề -->
+    <mat-form-field class="w-full">
+      <mat-label>Tiêu đề</mat-label>
+      <input matInput formControlName="title" placeholder="Nhập tiêu đề biểu quyết">
+    </mat-form-field>
+
+    <!-- Mô tả -->
+    <mat-form-field class="w-full">
+      <mat-label>Mô tả</mat-label>
+      <textarea matInput formControlName="description" rows="3" placeholder="Nhập mô tả biểu quyết"></textarea>
+    </mat-form-field>
+
+    <!-- Thời gian bắt đầu và kết thúc -->
+    <div class="grid grid-cols-2 gap-4">
+      <mat-form-field>
+        <mat-label>Thời gian bắt đầu</mat-label>
+        <input matInput type="datetime-local" formControlName="startTime">
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Thời gian kết thúc</mat-label>
+        <input matInput type="datetime-local" formControlName="endTime">
+      </mat-form-field>
+    </div>
+
+    <!-- Loại biểu quyết -->
+    <div class="w-full">
+      <mat-form-field class="w-full">
+        <mat-label>Loại biểu quyết</mat-label>
+        <mat-select formControlName="votingType">
+          <mat-option value="PUBLIC">Công khai</mat-option>
+          <mat-option value="PRIVATE">Kín</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Upload tài liệu -->
+    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
+      <div class="text-center">
+        <mat-icon class="text-gray-400 text-4xl mb-2">cloud_upload</mat-icon>
+        <p class="text-gray-600 mb-2">Kéo thả tài liệu vào đây hoặc click để chọn</p>
+        <input type="file" class="hidden" #fileInput (change)="onFileSelected($event)" multiple>
+        <button mat-stroked-button color="primary" (click)="fileInput.click()">
+          Chọn tài liệu
+        </button>
+      </div>
+      <!-- Danh sách tài liệu đã chọn -->
+      <div class="mt-4 space-y-2" *ngIf="selectedFiles.length > 0">
+        <div *ngFor="let file of selectedFiles" class="flex items-center justify-between bg-gray-50 p-2 rounded">
+          <span class="text-sm text-gray-700">{{file.name}}</span>
+          <button mat-icon-button color="warn" (click)="removeFile(file)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danh sách câu hỏi -->
+    <div class="space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-medium text-gray-700">Danh sách câu hỏi</h3>
+        <button mat-raised-button color="primary" (click)="addQuestion()">
+          <mat-icon>add</mat-icon>
+          Thêm câu hỏi
+        </button>
+      </div>
+
+      <!-- Danh sách câu hỏi -->
+      <div class="space-y-4" formArrayName="questions">
+        <div *ngFor="let question of questions.controls; let i = index" [formGroupName]="i" 
+             class="border border-gray-200 rounded-lg p-4">
+          <div class="flex justify-between items-start mb-4">
+            <mat-form-field class="w-full">
+              <mat-label>Câu hỏi {{i + 1}}</mat-label>
+              <input matInput formControlName="title" placeholder="Nhập nội dung câu hỏi">
+            </mat-form-field>
+            <button mat-icon-button color="warn" (click)="removeQuestion(i)" class="ml-2">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+          <!-- Danh sách lựa chọn -->
+          <div class="space-y-2" formArrayName="options">
+            <div *ngFor="let option of getQuestionOptions(i).controls; let j = index" 
+                 [formGroupName]="j" class="flex items-center gap-2">
+              <mat-form-field class="w-full">
+                <mat-label>Lựa chọn {{j + 1}}</mat-label>
+                <input matInput formControlName="content" placeholder="Nhập nội dung lựa chọn">
+              </mat-form-field>
+              <button mat-icon-button color="warn" (click)="removeOption(i, j)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nút thêm lựa chọn -->
+          <button mat-stroked-button color="primary" (click)="addOption(i)" class="mt-2">
+            <mat-icon>add</mat-icon>
+            Thêm lựa chọn
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="flex justify-end space-x-2 pt-4">
+  <button mat-button (click)="onCancel()" class="text-gray-600">Hủy</button>
+  <button mat-raised-button (click)="onSubmit()">Tạo biểu quyết</button>
+</mat-dialog-actions>

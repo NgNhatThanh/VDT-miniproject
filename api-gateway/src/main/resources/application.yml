@@ -30,6 +30,10 @@ spring:
           uri: lb://meeting-history-service
           predicates:
             - Path=/api/meeting-history/**
+        - id: vote-service
+          uri: lb://vote-service
+          predicates:
+            - Path=/api/vote/**
   main:
     web-application-type: reactive
 

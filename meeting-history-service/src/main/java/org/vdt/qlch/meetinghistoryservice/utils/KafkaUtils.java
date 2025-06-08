@@ -1,5 +1,6 @@
 package org.vdt.qlch.meetinghistoryservice.utils;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -52,9 +53,14 @@ public class KafkaUtils {
         producer.send(history);
     }
 
-    private final MessageListener<String, MeetingHistoryMessage> myMessageListener = (data) -> {
-        System.out.println("Dynamic Listener - Topic: " + data.topic() + ", Partition: " + data.partition() + ", Offset: " + data.offset() + ", Message: " + data.value());
-    };
+    private MessageListener<String, MeetingHistory> myMessageListener;
+
+    @PostConstruct
+    public void initListener(){
+        myMessageListener = (data) -> {
+            meetingHistoryService.sendMessage(data.value());
+        };
+    }
 
     public void subscribeTopics(String topic) {
         String groupId = topic + "-" + uniqId;

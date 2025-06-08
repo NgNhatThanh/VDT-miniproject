@@ -1,9 +1,11 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { OnlineUser } from '../../../../services/meeting-management.service';
+import { MeetingManagementService } from '../../../../services/meeting-management.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-participants-modal',
@@ -13,9 +15,13 @@ import { OnlineUser } from '../../../../services/meeting-management.service';
     <div class="p-4">
       <h2 class="text-lg font-semibold mb-3">Danh sách người tham gia</h2>
       <div class="h-[400px] border border-gray-200 rounded-lg">
-        <div class="h-full overflow-y-auto">
+        <div class="h-full overflow-y-auto [&::-webkit-scrollbar]:w-1
+          [&::-webkit-scrollbar-track]:rounded-full
+          [&::-webkit-scrollbar-track]:bg-gray-100
+          [&::-webkit-scrollbar-thumb]:rounded-full
+          [&::-webkit-scrollbar-thumb]:bg-gray-400">
           <div class="space-y-2 p-2">
-            <div *ngFor="let participant of data.participants" 
+            <div *ngFor="let participant of participants" 
                  class="flex items-center gap-3 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100 cursor-pointer">
               <img [src]="participant.picture" [alt]="participant.fullName" 
                    class="w-10 h-10 rounded-full object-cover">
@@ -40,9 +46,30 @@ import { OnlineUser } from '../../../../services/meeting-management.service';
     </div>
   `
 })
-export class ParticipantsModalComponent {
+export class ParticipantsModalComponent implements OnInit, OnDestroy {
+  participants: OnlineUser[] = [];
+  private subscription = new Subscription();
+
   constructor(
     public dialogRef: MatDialogRef<ParticipantsModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { participants: OnlineUser[] }
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: { participants: OnlineUser[] },
+    private meetingService: MeetingManagementService
+  ) {
+    this.participants = data.participants;
+  }
+
+  ngOnInit() {
+    // Lắng nghe sự thay đổi của meeting info từ service
+    this.subscription.add(
+      this.meetingService.meetingInfo$.subscribe(info => {
+        if (info?.onlineUsers) {
+          this.participants = info.onlineUsers;
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 } 

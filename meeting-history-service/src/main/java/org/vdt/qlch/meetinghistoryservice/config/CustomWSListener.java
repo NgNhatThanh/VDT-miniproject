@@ -8,9 +8,9 @@ import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.vdt.commonlib.dto.MeetingLeaveMessage;
 import org.vdt.commonlib.utils.Constants;
+import org.vdt.commonlib.utils.JwtUtil;
 import org.vdt.qlch.meetinghistoryservice.dto.ConnectionInfo;
 import org.vdt.qlch.meetinghistoryservice.producer.UserLeaveProducer;
-import org.vdt.qlch.meetinghistoryservice.utils.JwtUtil;
 import org.vdt.qlch.meetinghistoryservice.utils.KafkaUtils;
 
 @Configuration
@@ -28,7 +28,7 @@ public class CustomWSListener {
         SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.wrap(event.getMessage());
         int meetingId = Integer.parseInt((String)headerAccessor.getSessionAttributes().get("meetingId"));
         String token = (String) headerAccessor.getSessionAttributes().get("token");
-        String userId = jwtUtil.getUserId(token);
+        String userId = jwtUtil.extractUserId(token);
         String sessionId = headerAccessor.getSessionId();
         WebSocketConfig.connectionInfoMap.put(sessionId, new ConnectionInfo(sessionId, userId, meetingId));
         WebSocketConfig.meetingConnectCount.put(meetingId,

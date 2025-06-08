@@ -4,10 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MeetingManagementService, MeetingHeaderInfo } from '../../../services/meeting-management.service';
+import { MeetingManagementService, MeetingHeaderInfo, MeetingHistory } from '../../../services/meeting-management.service';
 import { LeaveMeetingModalComponent } from './leave-meeting-modal/leave-meeting-modal.component';
 import { ParticipantsModalComponent } from './participants-modal/participants-modal.component';
 import { Subscription } from 'rxjs';
+import { debounceTime, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -39,23 +40,43 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.meetingService.meetingJoinStatus$.subscribe(isJoined => {
         if (isJoined) {
-          this.meetingService.getMeetingHeaderInfo(this.meetingId).subscribe({
-            next: (data) => {
-              this.meetingInfo = data;
-            },
-            error: (error) => {
-              console.error('Error loading meeting info:', error);
-            }
-          });
+          this.loadMeetingInfo();
         } else {
           this.meetingInfo = null;
         }
+      })
+    );
+
+    // Lắng nghe tin nhắn mới nhất với debounceTime
+    this.subscription.add(
+      this.meetingService.latestHistoryMessage$.pipe(
+        filter((message): message is MeetingHistory => 
+          message !== null && this.shouldReloadInfo(message)
+        ),
+        debounceTime(500) // Đợi 500ms sau tin nhắn cuối cùng
+      ).subscribe(() => {
+        this.loadMeetingInfo();
       })
     );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private shouldReloadInfo(message: MeetingHistory): boolean {
+    return message.type === 'USER_JOINED' || message.type === 'USER_LEFT';
+  }
+
+  private loadMeetingInfo() {
+    this.meetingService.getMeetingHeaderInfo(this.meetingId).subscribe({
+      next: (data) => {
+        this.meetingInfo = data;
+      },
+      error: (error) => {
+        console.error('Error loading meeting info:', error);
+      }
+    });
   }
 
   openLeaveModal() {

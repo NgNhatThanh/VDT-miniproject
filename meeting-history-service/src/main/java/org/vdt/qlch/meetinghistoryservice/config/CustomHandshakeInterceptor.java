@@ -8,7 +8,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.vdt.qlch.meetinghistoryservice.utils.JwtUtil;
+import org.vdt.commonlib.utils.JwtUtil;
 
 import java.util.Map;
 

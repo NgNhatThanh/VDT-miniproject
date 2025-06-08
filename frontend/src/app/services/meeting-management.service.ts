@@ -63,14 +63,53 @@ export interface MeetingHeaderInfo {
   onlineUsers: OnlineUser[];
 }
 
+export interface MeetingHistory {
+  id: string;
+  content: string;
+  type: string;
+  createdAt: string;
+}
+
+export interface VotingOption {
+  content: string;
+}
+
+export interface VotingQuestion {
+  title: string;
+  options: VotingOption[];
+}
+
+export interface CreateVotingRequest {
+  meetingId: number;
+  title: string;
+  description: string;
+  startTime: Date;
+  endTime: Date;
+  type: 'PUBLIC' | 'PRIVATE';
+  documentIds: number[];
+  questions: VotingQuestion[];
+}
+
+export interface VotingInfo {
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  isVoted: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class MeetingManagementService {
-  private apiUrl = `${environment.apiUrl}/meeting-management`;
+  private apiUrl = `http://localhost:9090/api`;
   private currentMeetingJoinInfo: MeetingJoinResponse | null = null;
   private meetingJoinStatus = new BehaviorSubject<boolean>(false);
   public meetingJoinStatus$ = this.meetingJoinStatus.asObservable();
+
+  // Thêm BehaviorSubject cho meetingInfo
+  private meetingInfo = new BehaviorSubject<MeetingHeaderInfo | null>(null);
+  public meetingInfo$ = this.meetingInfo.asObservable();
 
   // STOMP Client
   private stompClient: Stomp.Client | null = null;
@@ -78,6 +117,10 @@ export class MeetingManagementService {
   public connected$ = this.connected.asObservable();
   private messageSubject = new Subject<any>();
   public message$ = this.messageSubject.asObservable();
+
+  // Latest history message
+  private latestHistoryMessage = new BehaviorSubject<MeetingHistory | null>(null);
+  public latestHistoryMessage$ = this.latestHistoryMessage.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -168,7 +211,17 @@ export class MeetingManagementService {
 
   // Lấy thông tin header của cuộc họp
   getMeetingHeaderInfo(meetingId: number): Observable<MeetingHeaderInfo> {
-    return this.http.get<MeetingHeaderInfo>(`http://localhost:9090/api/meeting/header-info?meetingId=${meetingId}`);
+    return this.http.get<MeetingHeaderInfo>(`http://localhost:9090/api/meeting/header-info?meetingId=${meetingId}`).pipe(
+      tap(info => {
+        this.meetingInfo.next(info);
+      })
+    );
+  }
+
+  // Lấy lịch sử cuộc họp
+  getMeetingHistories(meetingId: number, limit: number = 10, offset: number = 0): Observable<MeetingHistory[]> {
+    const url = `http://localhost:9090/api/meeting-history/get-histories?meetingId=${meetingId}&limit=${limit}&offset=${offset}`;
+    return this.http.get<MeetingHistory[]>(url);
   }
 
   // ===== STOMP methods =====
@@ -193,6 +246,8 @@ export class MeetingManagementService {
               const data = JSON.parse(message.body);
               console.log(data);
               this.messageSubject.next(data);
+              // Cập nhật tin nhắn mới nhất
+              this.latestHistoryMessage.next(data);
             } catch (e) {
               this.messageSubject.next(message.body);
             }
@@ -257,6 +312,16 @@ export class MeetingManagementService {
     return this.message$.pipe(
       filter(message => message.channel === `/api/meeting-history/meeting/${meetingId}`)
     );
+  }
+
+  // Tạo biểu quyết mới
+  createVoting(voting: CreateVotingRequest): Observable<any> {
+    return this.http.post('http://localhost:9090/api/vote/create-vote', voting);
+  }
+
+  // Lấy danh sách biểu quyết của một cuộc họp
+  getVotingList(meetingId: number): Observable<VotingInfo[]> {
+    return this.http.get<VotingInfo[]>(`http://localhost:9090/api/vote/get-list?meetingId=${meetingId}`);
   }
 
 } 

@@ -2,13 +2,17 @@ package org.vdt.qlch.meetingservice.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vdt.commonlib.dto.MeetingHistoryMessage;
 import org.vdt.commonlib.dto.RecordExistDTO;
+import org.vdt.commonlib.dto.UserDTO;
 import org.vdt.commonlib.exception.BadRequestException;
 import org.vdt.commonlib.model.MeetingHistoryType;
 import org.vdt.commonlib.utils.AuthenticationUtil;
+import org.vdt.commonlib.utils.JwtUtil;
 import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
 import org.vdt.qlch.meetingservice.dto.request.CreateMeetingDTO;
 import org.vdt.qlch.meetingservice.dto.request.JoinDTO;
@@ -44,6 +48,8 @@ public class MeetingService {
 
     private final DocumentService documentService;
 
+    private final JwtUtil jwtUtil;
+
     private final MeetingRedisService meetingRedisService;
 
     private final MeetingHistoryProducer historyProducer;
@@ -56,9 +62,9 @@ public class MeetingService {
         if(dto.startTime().isBefore(LocalDateTime.now().plusMinutes(15))){
             throw new BadRequestException(Constants.ErrorCode.STARTTIME_BEFORE_NOW_ERROR);
         }
-
         MeetingLocation location = locationRepository.findById(dto.locationId())
                 .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.MEETING_LOCATION_NOT_FOUND));
+
         String userId = AuthenticationUtil.extractUserId();
         Meeting meeting = Meeting.builder()
                 .title(dto.title())
@@ -124,7 +130,7 @@ public class MeetingService {
                     .toList();
             meetingDocumentRepository.saveAll(documents);
         }
-        return MeetingDTO.from(meetingRepository.save(meeting));
+        return MeetingDTO.from(meeting);
     }
 
     public List<MeetingCardDTO> getForUserCalendar(LocalDate startDate,
@@ -178,7 +184,9 @@ public class MeetingService {
         if(join.getMeeting().getEndTime().isBefore(LocalDateTime.now())){
             throw new BadRequestException(Constants.ErrorCode.MEETING_ENDED_ERROR);
         }
-        UserDTO user = userService.getById(userId);
+        final String jwt = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getTokenValue();
+        UserDTO user = jwtUtil.extractUser(jwt);
         String fullName = user.lastName() + " " + user.firstName();
         historyProducer.send(MeetingHistoryMessage.builder()
                         .meetingId(meetingId)

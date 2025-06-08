@@ -5,7 +5,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.vdt.commonlib.dto.MeetingHistoryMessage;
 import org.vdt.commonlib.exception.BadRequestException;
-import org.vdt.commonlib.utils.AuthenticationUtil;
 import org.vdt.qlch.meetinghistoryservice.dto.MeetingHistoryDTO;
 import org.vdt.qlch.meetinghistoryservice.model.MeetingHistory;
 import org.vdt.qlch.meetinghistoryservice.repository.MeetingHistoryRepository;

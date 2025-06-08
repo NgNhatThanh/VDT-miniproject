@@ -1,1 +1,25 @@
-<p>manage-section works!</p>
+<div class="bg-white">
+  <div class="text-lg font-medium text-gray-700 p-1 flex items-center">
+    <p class="ml-2">Thao tác</p>
+  </div>
+  <div class="flex flex-col gap-2 p-2 pt-0 pb-4">
+    <!-- Nút thêm ghi chú cá nhân - ai cũng có thể sử dụng -->
+    <button mat-raised-button color="primary" (click)="addPersonalNote()">
+      <mat-icon>note_add</mat-icon>
+      Ghi chú cá nhân
+    </button>
+
+    <!-- Nút lấy ý kiến biểu quyết - chỉ HOST mới có -->
+    <button mat-raised-button color="accent" (click)="startVoting()" *ngIf="isHost">
+      <mat-icon>how_to_vote</mat-icon>
+      Lấy ý kiến biểu quyết
+    </button>
+
+    <!-- Nút duyệt tài liệu - chỉ DOCUMENT_APPROVER mới có -->
+    <button mat-raised-button color="warn" (click)="approveDocument()" *ngIf="isDocumentApprover">
+      <mat-icon>approval</mat-icon>
+      Duyệt tài liệu
+    </button>
+  </div>
+
+</div>

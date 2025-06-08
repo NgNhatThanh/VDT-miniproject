@@ -18,6 +18,8 @@ public class Constants {
 
     public static class ErrorCode {
         public static final String INVALID_ENUM_VALUE = "INVALID_ENUM_VALUE";
+        public static final String STARTTIME_AFTER_ENDTIME_ERROR = "STARTTIME_AFTER_ENDTIME_ERROR";
+        public static final String DOCUMENT_NOT_FOUND = "DOCUMENT_NOT_FOUND";
     }
 
 }

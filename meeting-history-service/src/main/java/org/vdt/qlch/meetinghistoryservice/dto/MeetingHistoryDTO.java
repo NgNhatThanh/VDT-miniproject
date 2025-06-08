@@ -10,7 +10,7 @@ public record MeetingHistoryDTO(
         MeetingHistoryType type,
         LocalDateTime createdAt) {
 
-    public static final MeetingHistoryDTO from(MeetingHistory history){
+    public static MeetingHistoryDTO from(MeetingHistory history){
         return new MeetingHistoryDTO(history.getContent(),
                 history.getType(),
                 history.getCreatedAt());

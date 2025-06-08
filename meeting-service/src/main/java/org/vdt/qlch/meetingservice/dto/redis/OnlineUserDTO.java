@@ -1,8 +1,8 @@
 package org.vdt.qlch.meetingservice.dto.redis;
 
 import lombok.Builder;
+import org.vdt.commonlib.dto.UserDTO;
 import org.vdt.qlch.meetingservice.dto.response.JoinDTO;
-import org.vdt.qlch.meetingservice.dto.response.UserDTO;
 import org.vdt.qlch.meetingservice.model.MeetingJoin;
 
 @Builder
