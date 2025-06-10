@@ -37,6 +37,7 @@ public class RedisConfig{
     public <K, V> RedisTemplate<K, V> redisTemplate() {
         RedisTemplate<K, V> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(getConnectionFactory());
+        redisTemplate.setEnableTransactionSupport(true);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         objectMapper.activateDefaultTyping(

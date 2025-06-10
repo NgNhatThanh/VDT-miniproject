@@ -4,8 +4,12 @@ import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MeetingManagementService, VotingInfo } from '../../../services/meeting-management.service';
+import { MeetingManagementService, VotingInfo, MeetingHistory } from '../../../services/meeting-management.service';
 import { Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { VoteModalComponent } from './vote-modal/vote-modal.component';
+import { VoteResultModalComponent } from './vote-result-modal/vote-result-modal.component';
+import { filter, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-vote-section',
@@ -20,7 +24,8 @@ export class VoteSectionComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private meetingService: MeetingManagementService
+    private meetingService: MeetingManagementService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -41,6 +46,18 @@ export class VoteSectionComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Lắng nghe tin nhắn liên quan đến vote
+    this.subscription.add(
+      this.meetingService.latestHistoryMessage$.pipe(
+        filter((message): message is MeetingHistory => 
+          message !== null && this.shouldReloadVotingList(message)
+        ),
+        debounceTime(500) // Đợi 500ms sau tin nhắn cuối cùng
+      ).subscribe(() => {
+        this.loadVotingList();
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -55,6 +72,44 @@ export class VoteSectionComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Lỗi khi lấy danh sách biểu quyết:', error);
       }
+    });
+  }
+
+  openVoteModal(vote: VotingInfo) {
+    const meetingId = Number(this.route.snapshot.paramMap.get('meetingId'));
+    const dialogRef = this.dialog.open(VoteModalComponent, {
+      data: { 
+        meetingId,
+        meetingVoteId: vote.id 
+      },
+      width: '66vw',
+      height: '80vh',
+      maxWidth: '1200px',
+      maxHeight: '800px',
+      panelClass: 'vote-modal',
+      disableClose: true
+    });
+
+    // Lắng nghe kết quả từ dialog
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.loadVotingList(); // Tải lại danh sách vote khi submit thành công
+      }
+    });
+  }
+
+  openVoteResultModal(vote: VotingInfo) {
+    const meetingId = Number(this.route.snapshot.paramMap.get('meetingId'));
+    const dialogRef = this.dialog.open(VoteResultModalComponent, {
+      data: { 
+        meetingId,
+        meetingVoteId: vote.id 
+      },
+      width: '75vw',
+      height: '85vh',
+      maxWidth: '1200px',
+      maxHeight: '800px',
+      panelClass: 'vote-result-modal'
     });
   }
 
@@ -75,5 +130,11 @@ export class VoteSectionComponent implements OnInit, OnDestroy {
 
   isVoteEnded(vote: VotingInfo): boolean {
     return new Date() > new Date(vote.endTime);
+  }
+
+  private shouldReloadVotingList(message: MeetingHistory): boolean {
+    return message.type === 'VOTE_CREATED' || 
+           message.type === 'VOTE_ENDED' || 
+           message.type === 'VOTE_STARTED';
   }
 }

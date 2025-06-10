@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,10 +21,11 @@ public class MeetingRedisService {
 
     private final String MEETING_ONLINE_USERS_PREFIX = "meeting-online-users-";
 
+    @Transactional
     public void addUserOnline(OnlineUserDTO user, int meetingId){
-        Set<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
-        onlineUsers.add(user);
         try{
+            Set<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
+            onlineUsers.add(user);
             redisTemplate.opsForValue().set(MEETING_ONLINE_USERS_PREFIX + meetingId,
                     onlineUsers, Duration.ofMinutes(120));
         }
@@ -34,6 +34,7 @@ public class MeetingRedisService {
         }
     }
 
+    @Transactional
     public OnlineUserDTO removeUserOnline(String userId, int meetingId){
         Set<OnlineUserDTO> onlineUsers = getUserOnlineList(meetingId);
         OnlineUserDTO user = onlineUsers.stream()

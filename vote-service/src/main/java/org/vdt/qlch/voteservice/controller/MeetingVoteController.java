@@ -4,8 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.vdt.qlch.voteservice.dto.CreateVoteDTO;
-import org.vdt.qlch.voteservice.dto.MeetingVoteDTO;
+import org.vdt.commonlib.utils.AuthenticationUtil;
+import org.vdt.qlch.voteservice.dto.request.CreateVoteDTO;
+import org.vdt.qlch.voteservice.dto.request.VoteDTO;
+import org.vdt.qlch.voteservice.dto.response.MeetingVoteDTO;
+import org.vdt.qlch.voteservice.dto.response.MeetingVoteDetailDTO;
+import org.vdt.qlch.voteservice.dto.response.MeetingVoteStatusDTO;
 import org.vdt.qlch.voteservice.service.MeetingVoteService;
 
 import java.util.List;
@@ -25,7 +29,26 @@ public class MeetingVoteController {
 
     @GetMapping("/get-list")
     public ResponseEntity<List<MeetingVoteDTO>> getList(@RequestParam int meetingId){
-        return ResponseEntity.ok(meetingVoteService.getList(meetingId));
+        String userId = AuthenticationUtil.extractUserId();
+        return ResponseEntity.ok(meetingVoteService.getMeetingVoteListForUser(userId, meetingId));
     }
+
+    @GetMapping("/get-vote-for-selection")
+    public ResponseEntity<MeetingVoteDetailDTO> getForSelection(@RequestParam int meetingVoteId){
+        return ResponseEntity.ok(meetingVoteService.getForSelection(meetingVoteId));
+    }
+
+    @PostMapping("/vote")
+    public ResponseEntity<Map<String, String>> vote(@RequestBody @Valid VoteDTO dto){
+        String userId = AuthenticationUtil.extractUserId();
+        meetingVoteService.vote(userId, dto);
+        return ResponseEntity.ok().body(Map.of("message", "Vote voted"));
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<MeetingVoteStatusDTO> getStatus(@RequestParam int meetingVoteId){
+        return ResponseEntity.ok(meetingVoteService.getStatus(meetingVoteId));
+    }
+
 
 }

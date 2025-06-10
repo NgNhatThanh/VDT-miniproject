@@ -255,6 +255,9 @@ create table votes
 
 create table vote_option_selects
 (
+    id         integer generated always as identity
+        constraint vote_option_selects_pk
+        primary key,
     vote_id   integer
         constraint vote_option_selects_votes_id_fk
             references votes,

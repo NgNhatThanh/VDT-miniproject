@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
           [&::-webkit-scrollbar-thumb]:bg-gray-400">
           <div class="space-y-2 p-2">
             <div *ngFor="let participant of participants" 
-                 class="flex items-center gap-3 p-2 rounded-lg transition-colors duration-200 hover:bg-gray-100 cursor-pointer">
+                 class="participant-item flex items-center gap-3 p-2 rounded-lg transition-all duration-300 hover:bg-gray-100 cursor-pointer">
               <img [src]="participant.picture" [alt]="participant.fullName" 
                    class="w-10 h-10 rounded-full object-cover">
               <div class="flex-1 min-w-0">
@@ -44,7 +44,41 @@ import { Subscription } from 'rxjs';
         <button mat-button (click)="dialogRef.close()" class="text-gray-600">Đóng</button>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    .participant-item {
+      animation: slideIn 0.3s ease-out;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .participant-item.ng-leave {
+      animation: slideOut 0.3s ease-in;
+    }
+
+    @keyframes slideOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+    }
+  `]
 })
 export class ParticipantsModalComponent implements OnInit, OnDestroy {
   participants: OnlineUser[] = [];

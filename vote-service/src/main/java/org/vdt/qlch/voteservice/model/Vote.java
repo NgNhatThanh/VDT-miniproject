@@ -3,6 +3,7 @@ package org.vdt.qlch.voteservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Vote {
+public class Vote implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

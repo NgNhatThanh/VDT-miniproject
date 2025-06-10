@@ -27,6 +27,13 @@
                   {{ !isVoteStarted(vote) ? 'Chưa diễn ra' : 
                      isVoteStarted(vote) && !isVoteEnded(vote) ? 'Đang diễn ra' : 'Đã kết thúc' }}
                 </span>
+                <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+                      [ngClass]="{
+                        'bg-green-50 text-green-700 border border-green-200': vote.type === 'PUBLIC',
+                        'bg-purple-50 text-purple-700 border border-purple-200': vote.type === 'PRIVATE'
+                      }">
+                  {{ vote.type === 'PUBLIC' ? 'Công khai' : 'Kín' }}
+                </span>
               </div>
               <h3 class="text-lg font-semibold text-gray-700 truncate">{{ vote.title }}</h3>
               <div class="flex items-center gap-1 shrink-0">
@@ -50,13 +57,14 @@
           <div class="ml-4 flex flex-col gap-1">
             <button mat-button 
                     color="primary" 
-                    [disabled]="vote.isVoted">
+                    [disabled]="vote.isVoted || !isVoteStarted(vote) || isVoteEnded(vote)"
+                    (click)="openVoteModal(vote)">
               <mat-icon class="text-xl">how_to_vote</mat-icon>
               Bỏ phiếu
             </button>
             <button mat-button 
-                    color="primary" 
-                    [disabled]="vote.isVoted">
+                    color="primary"
+                    (click)="openVoteResultModal(vote)">
               <mat-icon class="text-xl">visibility</mat-icon>
               Xem
             </button>

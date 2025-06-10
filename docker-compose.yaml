@@ -93,6 +93,15 @@ services:
     networks:
       - qlch-network
 
+  redis-gui:
+    depends_on:
+      - redis
+    image: redis/redisinsight
+    ports:
+      - 5540:5540
+    networks:
+      - qlch-network
+
 networks:
   qlch-network:
     driver: bridge

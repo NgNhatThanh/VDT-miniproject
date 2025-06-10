@@ -59,9 +59,6 @@ public class MeetingService {
         if(dto.startTime().isAfter(dto.endTime())){
             throw new BadRequestException(Constants.ErrorCode.STARTTIME_AFTER_ENDTIME_ERROR);
         }
-        if(dto.startTime().isBefore(LocalDateTime.now().plusMinutes(15))){
-            throw new BadRequestException(Constants.ErrorCode.STARTTIME_BEFORE_NOW_ERROR);
-        }
         MeetingLocation location = locationRepository.findById(dto.locationId())
                 .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.MEETING_LOCATION_NOT_FOUND));
 
@@ -187,10 +184,9 @@ public class MeetingService {
         final String jwt = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
                 .getTokenValue();
         UserDTO user = jwtUtil.extractUser(jwt);
-        String fullName = user.lastName() + " " + user.firstName();
         historyProducer.send(MeetingHistoryMessage.builder()
                         .meetingId(meetingId)
-                        .content(fullName + " đã tham gia cuộc họp")
+                        .content(user.fullName() + " đã tham gia cuộc họp")
                         .type(MeetingHistoryType.USER_JOINED)
                         .build());
         meetingRedisService.addUserOnline(OnlineUserDTO.from(join, user), meetingId);

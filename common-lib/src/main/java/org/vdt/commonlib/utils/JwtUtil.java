@@ -19,11 +19,12 @@ public class JwtUtil {
 
     public UserDTO extractUser(String token){
         Jwt jwt = jwtDecoder.decode(token);
+        String lastName = jwt.getClaimAsString("family_name");
+        String firstName = jwt.getClaimAsString("given_name");
         return UserDTO.builder()
                 .id(jwt.getSubject())
                 .username(jwt.getClaimAsString("preferred_username"))
-                .firstName(jwt.getClaimAsString("given_name"))
-                .lastName(jwt.getClaimAsString("family_name"))
+                .fullName(lastName + " " + firstName)
                 .email(jwt.getClaimAsString("email"))
                 .picture(jwt.getClaimAsString("picture"))
                 .build();

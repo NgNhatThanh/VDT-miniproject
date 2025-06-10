@@ -16,7 +16,7 @@ public record OnlineUserDTO(
     public static OnlineUserDTO from(MeetingJoin join, UserDTO user) {
         return OnlineUserDTO.builder()
                 .id(user.id())
-                .fullName(user.lastName() + " " + user.firstName())
+                .fullName(user.fullName())
                 .picture(user.picture())
                 .join(JoinDTO.from(join))
                 .build();

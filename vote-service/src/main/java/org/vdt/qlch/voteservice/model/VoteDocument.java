@@ -3,6 +3,8 @@ package org.vdt.qlch.voteservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "vote_documents")
 @Getter
@@ -10,7 +12,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class VoteDocument {
+public class VoteDocument implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

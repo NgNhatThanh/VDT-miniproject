@@ -1,4 +1,4 @@
-package org.vdt.qlch.voteservice.dto;
+package org.vdt.qlch.voteservice.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

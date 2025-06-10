@@ -7,6 +7,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 public record UserDTO(
         String id,
         String username,
+        String fullName,
         String firstName,
         String lastName,
         String email,
@@ -17,6 +18,7 @@ public record UserDTO(
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .fullName(user.getLastName() + " " + user.getFirstName())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())

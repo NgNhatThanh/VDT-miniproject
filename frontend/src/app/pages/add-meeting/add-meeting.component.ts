@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MeetingService, MeetingLocation } from '../../services/meeting/meeting.service';
@@ -54,7 +55,8 @@ export class AddMeetingComponent implements OnInit {
     private meetingService: MeetingService,
     private userService: UserService,
     private meetingRoleService: MeetingRoleService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {
     this.meetingForm = this.fb.group({
       title: ['', Validators.required],
@@ -167,12 +169,26 @@ export class AddMeetingComponent implements OnInit {
         next: (response) => {
           console.log('Meeting created successfully:', response);
           this.isSubmitting = false;
-          // TODO: Thêm thông báo thành công và chuyển hướng
+          this.snackBar.open('Tạo cuộc họp thành công!', 'Đóng', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
+          // Reset form và dữ liệu
+          this.meetingForm.reset();
+          this.selectedFiles = [];
+          this.roleUsers = {};
         },
         error: (error) => {
           console.error('Error creating meeting:', error);
           this.isSubmitting = false;
-          // TODO: Thêm thông báo lỗi
+          this.snackBar.open('Có lỗi xảy ra khi tạo cuộc họp. Vui lòng thử lại!', 'Đóng', {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
         }
       });
     }

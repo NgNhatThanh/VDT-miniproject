@@ -9,7 +9,7 @@ public enum MeetingHistoryType {
 
     VOTE_CREATED,
     VOTE_STARTED,
-    VOTED,
+    VOTE_VOTED,
     VOTE_ENDED,
 
     SPEECH_REGISTERED,

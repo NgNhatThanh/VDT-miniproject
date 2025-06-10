@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @SuperBuilder
 @EntityListeners(CustomAuditingEntityListener.class)
-public abstract class AbstractAuditEntity {
+public abstract class AbstractAuditEntity implements Serializable {
 
     @CreationTimestamp
     @Column(name = "created_at")

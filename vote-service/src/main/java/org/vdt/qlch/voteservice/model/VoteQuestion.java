@@ -3,6 +3,7 @@ package org.vdt.qlch.voteservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
@@ -12,7 +13,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoteQuestion {
+public class VoteQuestion implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +25,9 @@ public class VoteQuestion {
     @JoinColumn(name = "meeting_vote_id")
     private MeetingVote vote;
 
-    @OneToMany(mappedBy = "question")
+    @OneToMany(mappedBy = "question",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL)
     private List<VoteOption> options;
 
 }

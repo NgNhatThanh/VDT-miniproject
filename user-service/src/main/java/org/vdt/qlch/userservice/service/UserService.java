@@ -2,7 +2,10 @@ package org.vdt.qlch.userservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.UserResource;
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.vdt.commonlib.dto.RecordExistDTO;
 import org.vdt.commonlib.exception.NotFoundException;
@@ -34,11 +37,25 @@ public class UserService {
         return allUsers.stream().map(UserDTO::from).toList();
     }
 
+    @Cacheable(value = "user-info", key = "#userId")
     public UserDTO getById(String userId) {
         try{
             UserRepresentation userRepresentation = keycloak.realm(keycloakPropsConfig.getRealm())
                     .users().get(userId).toRepresentation();
             return UserDTO.from(userRepresentation);
+        }
+        catch (jakarta.ws.rs.NotFoundException e){
+            throw new NotFoundException(Constants.ErrorCode.USER_NOT_FOUND);
+        }
+    }
+
+    public List<UserDTO> getList(List<String> userIds) {
+        try{
+            UsersResource usersResource = keycloak.realm(keycloakPropsConfig.getRealm()).users();
+            List<UserDTO> userDTOs = userIds.stream()
+                    .map(id -> UserDTO.from(usersResource.get(id).toRepresentation()))
+                    .toList();
+            return userDTOs;
         }
         catch (jakarta.ws.rs.NotFoundException e){
             throw new NotFoundException(Constants.ErrorCode.USER_NOT_FOUND);

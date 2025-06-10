@@ -91,11 +91,78 @@ export interface CreateVotingRequest {
 }
 
 export interface VotingInfo {
+  id: number;
   title: string;
   description: string;
   startTime: string;
   endTime: string;
   isVoted: boolean;
+  type: 'PUBLIC' | 'PRIVATE';
+}
+
+export interface VoteOption {
+  id: number;
+  content: string;
+  voters: any[] | null;
+}
+
+export interface VoteQuestion {
+  id: number;
+  title: string;
+  options: VoteOption[];
+}
+
+export interface VoteDetail {
+  id: number;
+  title: string;
+  description: string;
+  type: 'PUBLIC' | 'PRIVATE';
+  startTime: string;
+  endTime: string;
+  documents: any[];
+  questions: VoteQuestion[];
+}
+
+export interface VoteAnswer {
+  questionId: number;
+  optionId: number;
+}
+
+export interface SubmitVoteRequest {
+  meetingId: number;
+  meetingVoteId: number;
+  questionSelections: {
+    questionId: number;
+    optionId: number;
+  }[];
+}
+
+export interface VoterInfo {
+  fullName: string;
+  picture: string;
+}
+
+export interface VoteOptionStatus {
+  optionId: number;
+  voteCount: number;
+  voterInfos: VoterInfo[];
+}
+
+export interface VoteQuestionStatus {
+  questionId: number;
+  options: VoteOptionStatus[];
+}
+
+export interface VoteStatus {
+  meetingVoteId: number;
+  questions: VoteQuestionStatus[];
+}
+
+export interface VoteStatusResponse {
+  detail: VoteDetail;
+  vote: any;
+  voteStatus: VoteStatus;
+  voted: boolean;
 }
 
 @Injectable({
@@ -322,6 +389,21 @@ export class MeetingManagementService {
   // Lấy danh sách biểu quyết của một cuộc họp
   getVotingList(meetingId: number): Observable<VotingInfo[]> {
     return this.http.get<VotingInfo[]>(`http://localhost:9090/api/vote/get-list?meetingId=${meetingId}`);
+  }
+
+  // Lấy thông tin chi tiết biểu quyết để bỏ phiếu
+  getVoteForSelection(meetingVoteId: number): Observable<VoteDetail> {
+    return this.http.get<VoteDetail>(`http://localhost:9090/api/vote/get-vote-for-selection?meetingVoteId=${meetingVoteId}`);
+  }
+
+  // Gửi phiếu bầu
+  submitVote(request: SubmitVoteRequest): Observable<any> {
+    return this.http.post('http://localhost:9090/api/vote/vote', request);
+  }
+
+  // Lấy thông tin trạng thái biểu quyết
+  getVoteStatus(meetingVoteId: number): Observable<VoteStatusResponse> {
+    return this.http.get<VoteStatusResponse>(`http://localhost:9090/api/vote/status?meetingVoteId=${meetingVoteId}`);
   }
 
 } 

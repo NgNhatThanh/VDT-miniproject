@@ -15,7 +15,7 @@ import java.util.List;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MeetingVote extends AbstractAuditEntity {
+public class MeetingVote extends AbstractAuditEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +34,14 @@ public class MeetingVote extends AbstractAuditEntity {
     @Enumerated(EnumType.STRING)
     private MeetingVoteType type;
 
-    @OneToMany(mappedBy = "vote")
+    @OneToMany(mappedBy = "vote",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL)
+    private List<VoteDocument> documents;
+
+    @OneToMany(mappedBy = "vote",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL)
     private List<VoteQuestion> questions;
 
 }

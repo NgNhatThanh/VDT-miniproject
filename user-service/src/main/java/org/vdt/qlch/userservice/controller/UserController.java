@@ -30,4 +30,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getById(userId));
     }
 
+    @PostMapping("/get-list")
+    public ResponseEntity<List<UserDTO>> getList(@RequestBody List<String> userIds){
+        return ResponseEntity.ok(userService.getList(userIds));
+    }
+
 }

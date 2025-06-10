@@ -20,7 +20,8 @@ public interface MeetingJoinRepository extends JpaRepository<MeetingJoin, Intege
                 "join meeting_locations l\n" +
                 "on m.location_id = l.id\n" +
                 "where j.user_id = ?1\n" +
-                "and date(m.start_time) between ?2 and ?3")
+                "and (date(m.start_time) between ?2 and ?3\n" +
+                "or date(m.end_time) between ?2 and ?3)")
     List<MeetingCardDTO> findAllByUserWithinDate(String userId, LocalDate startDate, LocalDate endDate);
 
     @Query(nativeQuery = true,

@@ -11,3 +11,4 @@ vdt:
   services:
     meeting: ${gateway-url}/api/meeting
     document: ${gateway-url}/api/document
+    user: ${gateway-url}/api/user

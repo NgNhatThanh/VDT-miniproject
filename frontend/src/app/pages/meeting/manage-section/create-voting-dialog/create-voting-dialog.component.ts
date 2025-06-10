@@ -11,7 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../../../../common/components/confirm-dialog/confirm-dialog.component';
 import { CreateVotingRequest, MeetingManagementService } from '../../../../services/meeting-management.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
