@@ -13,7 +13,8 @@ public enum MeetingHistoryType {
     VOTE_ENDED,
 
     SPEECH_REGISTERED,
-    SPEECH_GRANTED,
+    SPEECH_REJECTED,
+    SPEECH_APPROVED,
     SPEECH_STARTED,
     SPEECH_ENDED
 }

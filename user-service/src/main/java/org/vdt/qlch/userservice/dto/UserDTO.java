@@ -3,6 +3,8 @@ package org.vdt.qlch.userservice.dto;
 import lombok.Builder;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import java.io.Serializable;
+
 @Builder
 public record UserDTO(
         String id,
@@ -12,7 +14,7 @@ public record UserDTO(
         String lastName,
         String email,
         String picture
-) {
+) implements Serializable {
 
     public static UserDTO from(UserRepresentation user) {
         return UserDTO.builder()

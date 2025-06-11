@@ -20,6 +20,16 @@
               }">
           {{ voteData?.detail?.type === 'PUBLIC' ? 'Công khai' : 'Kín' }}
         </span>
+        <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+              [ngClass]="{
+                'bg-green-50 text-green-700 border border-green-200': voteData?.voted,
+                'bg-gray-50 text-gray-700 border border-gray-200': !voteData?.voted
+              }">
+          <div class="flex items-center gap-1">
+            <mat-icon class="text-xl">{{ voteData?.voted ? 'how_to_vote' : 'how_to_vote_outlined' }}</mat-icon>
+            {{ voteData?.voted ? 'Đã bỏ phiếu' : 'Chưa bỏ phiếu' }}
+          </div>
+        </span>
         <span *ngIf="lastUpdated" class="text-xs text-gray-500">
           Cập nhật lúc: {{ formatDateTime(lastUpdated) }}
         </span>

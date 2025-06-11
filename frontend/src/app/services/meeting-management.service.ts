@@ -165,6 +165,26 @@ export interface VoteStatusResponse {
   voted: boolean;
 }
 
+export interface RegisterSpeechRequest {
+  meetingId: number;
+  content: string;
+  duration: number;
+}
+
+export interface SpeechRegistration {
+  id: number;
+  content: string;
+  duration: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ON_GOING' | 'ENDED';
+  speakerFullName: string;
+  createdAt: string;
+}
+
+export interface UpdateSpeechStatusRequest {
+  speechId: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ON_GOING' | 'ENDED';
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -404,6 +424,21 @@ export class MeetingManagementService {
   // Lấy thông tin trạng thái biểu quyết
   getVoteStatus(meetingVoteId: number): Observable<VoteStatusResponse> {
     return this.http.get<VoteStatusResponse>(`http://localhost:9090/api/vote/status?meetingVoteId=${meetingVoteId}`);
+  }
+
+  // Đăng ký phát biểu
+  registerSpeech(request: RegisterSpeechRequest): Observable<any> {
+    return this.http.post('http://localhost:9090/api/speech/register', request);
+  }
+
+  // Lấy danh sách đăng ký phát biểu
+  getSpeechRegistrations(meetingId: number): Observable<SpeechRegistration[]> {
+    return this.http.get<SpeechRegistration[]>(`http://localhost:9090/api/speech/get-list?meetingId=${meetingId}`);
+  }
+
+  // Cập nhật trạng thái phát biểu
+  updateSpeechStatus(request: UpdateSpeechStatusRequest): Observable<any> {
+    return this.http.post('http://localhost:9090/api/speech/update', request);
   }
 
 } 

@@ -1,6 +1,7 @@
 package org.vdt.qlch.voteservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
@@ -25,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MeetingVoteCacheService {
@@ -107,9 +109,10 @@ public class MeetingVoteCacheService {
     public VoteStatusDTO updateVoteStatus(int meetingVoteId, List<QuestionSelectDTO> selections, UserDTO voter) {
         MeetingVote meetingVote = getById(meetingVoteId);
         VoteStatusDTO voteStatusDTO = getVoteStatusInCache(meetingVoteId);
+        if(voteStatusDTO == null) voteStatusDTO = getVoteStatusInDB(meetingVoteId);
         voteStatusDTO.questions().forEach(q -> {
             QuestionSelectDTO qSel = selections.stream()
-                    .filter(s -> s.questionId() == q.questionId())
+                    .dropWhile(s -> s.questionId() != q.questionId())
                     .toList().getFirst();
             q.options().forEach(o -> {
                 if(o.getOptionId() == qSel.optionId()){
@@ -141,11 +144,7 @@ public class MeetingVoteCacheService {
             Map<String, UserDTO> userMap = new HashMap<>();
             userDTOS.forEach(u -> userMap.put(u.id(), u));
             Map<Integer, OptionStatusDTO> voteCountMap = new HashMap<>();
-            meetingVote.getQuestions().forEach(q -> {
-                q.getOptions().forEach(o -> {
-                    voteCountMap.putIfAbsent(o.getId(), new OptionStatusDTO(o.getId(), 0, new ArrayList<>()));
-                });
-            });
+            meetingVote.getQuestions().forEach(q -> q.getOptions().forEach(o -> voteCountMap.putIfAbsent(o.getId(), new OptionStatusDTO(o.getId(), 0, new ArrayList<>()))));
             votes.forEach(v -> v.getSelectedOptions().forEach(option -> {
                 OptionStatusDTO os = voteCountMap.get(option.getId());
                 os.setVoteCount(os.getVoteCount() + 1);
@@ -191,24 +190,34 @@ public class MeetingVoteCacheService {
 
     public VoteStatusDTO getVoteStatusInCache(int meetingVoteId) {
         VoteStatusDTO res = null;
-        Cache cache = cacheManager.getCache("vote-status");
-        if(cache != null){
-            Cache.ValueWrapper wrapper = cache.get(meetingVoteId);
-            if(wrapper != null){
-                res = (VoteStatusDTO) wrapper.get();
+        try{
+            Cache cache = cacheManager.getCache("vote-status");
+            if(cache != null){
+                Cache.ValueWrapper wrapper = cache.get(meetingVoteId);
+                if(wrapper != null){
+                    res = (VoteStatusDTO) wrapper.get();
+                }
             }
+        }
+        catch (Exception e){
+            log.error(e.getMessage());
         }
         return res;
     }
 
     public UserSelectionsDTO getUserSelections(String userId, int meetingVoteId){
         UserSelectionsDTO res = null;
-        Cache cache = cacheManager.getCache("user-vote-selection");
-        if(cache != null){
-            Cache.ValueWrapper wrapper = cache.get(String.format("%s-%s", userId, meetingVoteId));
-            if(wrapper != null){
-                res = (UserSelectionsDTO) wrapper.get();
+        try{
+            Cache cache = cacheManager.getCache("user-vote-selection");
+            if(cache != null){
+                Cache.ValueWrapper wrapper = cache.get(String.format("%s-%s", userId, meetingVoteId));
+                if(wrapper != null){
+                    res = (UserSelectionsDTO) wrapper.get();
+                }
             }
+        }
+        catch (Exception e){
+            log.error(e.getMessage());
         }
         return res;
     }

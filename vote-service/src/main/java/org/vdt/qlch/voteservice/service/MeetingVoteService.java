@@ -159,12 +159,13 @@ public class MeetingVoteService {
         if(meetingVote.getType() == MeetingVoteType.PUBLIC){
             dto.questionSelections().forEach(selection -> {
                 VoteQuestion question = meetingVote.getQuestions().stream()
-                        .filter(q -> q.getId() == selection.questionId())
+                        .dropWhile(q -> q.getId() != selection.questionId())
                         .toList().getFirst();
                 if(question == null){
                     throw new BadRequestException(org.vdt.qlch.voteservice.utils.Constants.ErrorCode.MEETING_VOTE_NOT_FOUND);
                 }
-                VoteOption option = question.getOptions().stream().filter(o -> o.getId() == selection.optionId())
+                VoteOption option = question.getOptions().stream()
+                        .dropWhile(o -> o.getId() != selection.optionId())
                         .toList().getFirst();
                 if(option == null){
                     throw new BadRequestException(org.vdt.qlch.voteservice.utils.Constants.ErrorCode.MEETING_VOTE_NOT_FOUND);

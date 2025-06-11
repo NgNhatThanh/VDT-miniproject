@@ -13,6 +13,9 @@ LIMIT = -1;
 CREATE DATABASE vote WITH OWNER = admin ENCODING = 'UTF8' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8' TABLESPACE = pg_default CONNECTION
 LIMIT = -1;
 
+CREATE DATABASE speech WITH OWNER = admin ENCODING = 'UTF8' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8' TABLESPACE = pg_default CONNECTION
+LIMIT = -1;
+
 \c meeting
 
 create table meetings
@@ -265,4 +268,24 @@ create table vote_option_selects
         constraint vote_option_selects_vote_question_options_id_fk
             references vote_question_options
 );
+
+\c speech
+
+create table meeting_speeches
+(
+    id          integer generated always as identity
+        constraint meeting_speeches_pk
+        primary key,
+    meeting_id  integer not null,
+    speaker_id  varchar not null,
+    approved_by varchar,
+    content varchar not null,
+    status      varchar not null,
+    duration    integer not null,
+    created_at  timestamp,
+    created_by  varchar,
+    updated_at  timestamp,
+    updated_by  varchar
+);
+
 
