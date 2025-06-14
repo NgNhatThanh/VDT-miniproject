@@ -71,7 +71,7 @@
       <div class="bg-gray-50 p-4 rounded-lg">
         <h3 class="text-lg font-semibold mb-4">Kết quả</h3>
         <div class="space-y-6">
-          <div *ngFor="let question of voteData.detail.questions; let i = index" class="border-b pb-6 last:border-b-0">
+          <div *ngFor="let question of voteData.detail.questions; let i = index" class="border-b border-gray-400 pb-6 last:border-b-0">
             <div class="flex items-center gap-2 mb-4">
               <span class="font-bold text-lg">{{ i + 1 }}.</span>
               <h4 class="font-bold text-lg">{{ question.title }}</h4>
@@ -123,6 +123,17 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Tài liệu đính kèm -->
+      <div *ngIf="voteData.detail.documents?.length" class="bg-gray-50 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Tài liệu đính kèm</h3>
+        <div class="grid grid-cols-1 gap-4">
+          <app-document-card 
+            *ngFor="let doc of voteData.detail.documents"
+            [document]="doc">
+          </app-document-card>
         </div>
       </div>
     </div>

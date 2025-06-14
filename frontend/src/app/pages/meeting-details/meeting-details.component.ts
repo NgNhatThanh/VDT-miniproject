@@ -27,7 +27,11 @@ export class MeetingDetailsComponent implements OnInit {
   error: string | null = null;
   tabs = [
     { name: 'Thông tin', path: 'thong-tin' },
-    { name: 'Thành phần tham dự', path: 'thanh-phan-tham-du' }
+    { name: 'Thành phần tham dự', path: 'thanh-phan-tham-du' },
+    { name: 'Tài liệu', path: 'tai-lieu' },
+    { name: 'Biểu quyết', path: 'bieu-quyet' },
+    { name: 'Ghi chú cá nhân', path: 'ghi-chu-ca-nhan' },
+    { name: 'Lịch sử', path: 'lich-su' }
   ];
 
   constructor(

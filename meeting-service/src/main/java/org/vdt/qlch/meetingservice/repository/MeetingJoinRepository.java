@@ -28,4 +28,5 @@ public interface MeetingJoinRepository extends JpaRepository<MeetingJoin, Intege
             value = "select * from user_join_meeting where user_id = ?1 and meeting_id = ?2")
     MeetingJoin findByUserIdAndMeetingId(String userId, int meetingId);
 
+    List<MeetingJoin> findAllByMeeting_Id(int meetingId);
 }

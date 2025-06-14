@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import Keycloak from 'keycloak-js';
 import { UserProfile } from './user-profile';
 
+interface TokenPayload {
+  realm_access: {
+    roles: string[];
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,6 +59,20 @@ export class KeycloakService {
 
   logout(){
     return this.keycloak.logout();
+  }
+
+  getUserRoles(): string[] {
+    if (!this.keycloak.token) {
+      return [];
+    }
+    
+    try {
+      const tokenPayload = JSON.parse(atob(this.keycloak.token.split('.')[1])) as TokenPayload;
+      return tokenPayload.realm_access?.roles || [];
+    } catch (error) {
+      console.error('Error parsing token:', error);
+      return [];
+    }
   }
 
 }

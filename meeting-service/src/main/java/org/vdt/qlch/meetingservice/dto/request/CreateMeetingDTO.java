@@ -15,6 +15,6 @@ public record CreateMeetingDTO(
         @NotNull LocalDateTime endTime,
         @NotNull Integer locationId,
         @NotEmpty List<@Valid JoinDTO> joins,
-        List<Integer> documentsIds
+        List<Integer> documentIds
         ) {
 }

@@ -7,7 +7,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MeetingManagementService, VoteStatusResponse, MeetingHistory } from '../../../../services/meeting-management.service';
 import { VoterListModalComponent } from './voter-list-modal/voter-list-modal.component';
 import { Subscription } from 'rxjs';
-import { filter, debounceTime, skip } from 'rxjs/operators';
+import { filter, debounceTime } from 'rxjs/operators';
+import { DocumentCardComponent } from '../../../../components/document-card/document-card.component';
 
 interface VoteSelection {
   questionId: number;
@@ -17,7 +18,14 @@ interface VoteSelection {
 @Component({
   selector: 'app-vote-result-modal',
   standalone: true,
-  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [
+    CommonModule, 
+    MatDialogModule, 
+    MatButtonModule, 
+    MatIconModule, 
+    MatTooltipModule,
+    DocumentCardComponent
+  ],
   templateUrl: 'vote-result-modal.component.html'
 })
 export class VoteResultModalComponent implements OnInit, OnDestroy {

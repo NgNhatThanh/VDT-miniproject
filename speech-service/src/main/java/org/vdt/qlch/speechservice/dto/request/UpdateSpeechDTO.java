@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateSpeechDTO(
+        @NotNull Integer meetingId,
         @NotNull Integer speechId,
         @NotBlank String status
 ) {

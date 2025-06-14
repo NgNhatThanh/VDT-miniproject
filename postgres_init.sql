@@ -151,11 +151,11 @@ create table meeting_documents
     status      varchar not null,
     meeting_id  integer references meetings(id),
     document_id integer,
-    approved_by varchar not null,
+    approved_by varchar,
     created_at  timestamp,
     created_by  varchar,
     updated_at  timestamp,
-    updated_by  timestamp
+    updated_by  varchar
 );
 
 insert into meeting_roles(name) values ('GUEST'), ('SECRETARY'), ('PARTICIPANT'), ('DOCUMENT_APPROVER') , ('HOST');

@@ -28,6 +28,7 @@ public class MeetingDocument extends AbstractAuditEntity {
 
     private int documentId;
 
+    @Enumerated(EnumType.STRING)
     private DocumentStatus status;
 
     private String approvedBy;

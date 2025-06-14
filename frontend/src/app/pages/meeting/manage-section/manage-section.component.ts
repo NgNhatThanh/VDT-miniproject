@@ -7,11 +7,14 @@ import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateVotingDialogComponent } from './create-voting-dialog/create-voting-dialog.component';
 import { ActivatedRoute } from '@angular/router';
+import { NgIf } from '@angular/common';
+import { DocumentApprovalButtonComponent } from './document-approval-button/document-approval-button.component';
+import { PrivateNoteModalComponent } from './private-note-modal/private-note-modal.component';
 
 @Component({
   selector: 'app-manage-section',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, NgIf, DocumentApprovalButtonComponent],
   templateUrl: './manage-section.component.html',
   styles: [`
     button {
@@ -64,7 +67,18 @@ export class ManageSectionComponent implements OnInit, OnDestroy {
   }
 
   addPersonalNote() {
-    // TODO: Implement
+    const dialogRef = this.dialog.open(PrivateNoteModalComponent, {
+      width: '500px',
+      disableClose: true,
+      data: { meetingId: this.meetingId }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Note content:', result);
+        // TODO: Xử lý lưu ghi chú ở đây
+      }
+    });
   }
 
   startVoting(): void {

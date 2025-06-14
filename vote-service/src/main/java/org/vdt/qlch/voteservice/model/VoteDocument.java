@@ -2,6 +2,7 @@ package org.vdt.qlch.voteservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.vdt.commonlib.model.AbstractAuditEntity;
 
 import java.io.Serializable;
 

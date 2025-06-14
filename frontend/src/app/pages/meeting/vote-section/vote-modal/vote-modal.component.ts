@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialogComponent } from '../../../../common/components/confirm-dialog/confirm-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DocumentCardComponent } from '../../../../components/document-card/document-card.component';
 
 interface VoteModalData {
   meetingId: number;
@@ -23,7 +24,8 @@ interface VoteModalData {
     MatProgressSpinnerModule,
     MatRadioModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    DocumentCardComponent
   ]
 })
 export class VoteModalComponent implements OnInit {

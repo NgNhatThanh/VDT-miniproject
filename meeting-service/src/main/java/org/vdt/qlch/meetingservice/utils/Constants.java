@@ -5,7 +5,6 @@ public final class Constants {
     public final class ErrorCode{
         public static final String MEETING_LOCATION_NOT_FOUND = "MEETING_LOCATION_NOT_FOUND";
         public static final String STARTTIME_AFTER_ENDTIME_ERROR = "STARTTIME_AFTER_ENDTIME_ERROR";
-        public static final String STARTTIME_BEFORE_NOW_ERROR = "STARTTIME_BEFORE_NOW_ERROR";
         public static final String MEETING_LOCATION_EXISTED = "MEETING_LOCATION_EXISTED";
         public static final String PARTICIPANT_NOT_FOUND = "PARTICIPANT_NOT_FOUND";
         public static final String DOCUMENT_NOT_FOUND = "DOCUMENT_NOT_FOUND";
@@ -15,6 +14,7 @@ public final class Constants {
         public static final String REJECT_WITH_NO_REASON_ERROR = "REJECT_WITH_NO_REASON_ERROR";
         public static final String MEETING_JOIN_ERROR = "MEETING_JOIN_ERROR";
         public static final String MEETING_ENDED_ERROR = "MEETING_ENDED_ERROR";
+        public static final String NOTE_NOT_FOUND = "NOTE_NOT_FOUND";
     }
 
     public final class MeetingRole{

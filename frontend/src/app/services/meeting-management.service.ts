@@ -6,6 +6,20 @@ import { KeycloakService } from './keycloak/keycloak.service';
 import { filter, tap } from 'rxjs/operators';
 import * as Stomp from 'stompjs';
 
+export interface Note {
+  id: number;
+  content: string;
+  updatedAt: string;
+} 
+
+export interface Participant {
+  joinId: number;
+  fullName: string;
+  picture: string;
+  status: string;
+  roles: MeetingRole[];
+}
+
 export interface MeetingManagement {
   id?: number;
   title: string;
@@ -119,7 +133,7 @@ export interface VoteDetail {
   type: 'PUBLIC' | 'PRIVATE';
   startTime: string;
   endTime: string;
-  documents: any[];
+  documents: MeetingDocument[];
   questions: VoteQuestion[];
 }
 
@@ -182,7 +196,27 @@ export interface SpeechRegistration {
 
 export interface UpdateSpeechStatusRequest {
   speechId: number;
+  meetingId: number;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'ON_GOING' | 'ENDED';
+}
+
+export interface MeetingDocument {
+  id: number;
+  name: string;
+  size: number;
+  url: string;
+}
+
+export interface DocumentForApproval {
+  meetingDocumentId: number;
+  detail: MeetingDocument;
+  uploaderFullName: string;
+}
+
+export interface UpdateDocumentStatusRequest {
+  meetingDocumentId: number;
+  meetingId: number;
+  status: string;
 }
 
 @Injectable({
@@ -441,4 +475,50 @@ export class MeetingManagementService {
     return this.http.post('http://localhost:9090/api/speech/update', request);
   }
 
+  // Lấy danh sách tài liệu của cuộc họp
+  getMeetingDocuments(meetingId: number): Observable<MeetingDocument[]> {
+    return this.http.get<MeetingDocument[]>(`http://localhost:9090/api/meeting/document/get-list?meetingId=${meetingId}`);
+  }
+
+  // Thêm tài liệu vào cuộc họp
+  addDocumentToMeeting(meetingId: number, documentId: number): Observable<any> {
+    return this.http.post(`http://localhost:9090/api/meeting/document/add-to-meeting?meetingId=${meetingId}&documentId=${documentId}`, {});
+  }
+
+  // Lấy danh sách tài liệu cần duyệt
+  getDocumentsForApproval(meetingId: number): Observable<DocumentForApproval[]> {
+    return this.http.get<DocumentForApproval[]>(`http://localhost:9090/api/meeting/document/get-for-approvement?meetingId=${meetingId}`);
+  }
+
+  // Cập nhật trạng thái tài liệu
+  updateDocumentStatus(request: UpdateDocumentStatusRequest): Observable<any> {
+    return this.http.post('http://localhost:9090/api/meeting/document/update-status', request);
+  }
+
+  getListNote(meetingId: number): Observable<Note[]> {
+    return this.http.get<Note[]>(`${this.apiUrl}/meeting/get-list-note?meetingId=${meetingId}`);
+  }
+
+  addNote(meetingId: number, content: string): Observable<Note> {
+    return this.http.post<Note>(`${this.apiUrl}/meeting/add-note`, {
+      meetingId,
+      content
+    });
+  }
+
+  updateNote(noteId: number, content: string): Observable<Note> {
+    return this.http.post<Note>(`${this.apiUrl}/meeting/update-note`, {
+      noteId,
+      content
+    });
+  }
+
+  deleteNote(noteId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/meeting/delete-note?noteId=${noteId}`, {});
+  }
+
+  // Lấy danh sách người tham gia cuộc họp
+  getParticipants(meetingId: number): Observable<Participant[]> {
+    return this.http.get<Participant[]>(`http://localhost:9090/api/meeting/get-list-participants?meetingId=${meetingId}`);
+  }
 } 

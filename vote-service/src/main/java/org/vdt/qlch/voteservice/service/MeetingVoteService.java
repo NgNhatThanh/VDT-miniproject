@@ -94,6 +94,7 @@ public class MeetingVoteService {
         }
         List<VoteDocument> documents = documentIds.stream()
                 .map(id -> VoteDocument.builder()
+                        .vote(meetingVote)
                         .documentId(id)
                         .build())
                 .toList();

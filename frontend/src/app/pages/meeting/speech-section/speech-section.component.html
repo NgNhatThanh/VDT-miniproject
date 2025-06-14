@@ -1,6 +1,6 @@
 <div class="p-2 bg-white h-full w-full rounded-sm flex flex-col">
   <div class="flex justify-between items-center mb-4">
-    <h2 class="ml-2 text-2xl font-semibold text-gray-800 m-0">Danh sách phát biểu</h2>
+    <h2 class="ml-2 text-xl font-medium text-gray-800 m-0">Danh sách phát biểu</h2>
     <button 
     style="border-radius: 5px;"
     mat-raised-button color="primary" class="shadow-sm" (click)="openRegisterDialog()">
@@ -27,7 +27,7 @@
        [&::-webkit-scrollbar-thumb]:rounded-full
        [&::-webkit-scrollbar-thumb]:bg-gray-400">
     <div *ngFor="let registration of speechRegistrations" 
-         class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+         class="border border-gray-200 shadow-sm bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
       <div class="flex justify-between items-start mb-2">   
         <div class="flex items-center gap-4">
           <div class="flex items-center">

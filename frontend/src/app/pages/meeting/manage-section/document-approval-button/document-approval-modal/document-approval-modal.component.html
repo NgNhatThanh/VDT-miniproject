@@ -1,0 +1,48 @@
+<div class="flex flex-col h-full">
+  <div class="p-5">
+    <h2 mat-dialog-title class="m-0">Duyệt tài liệu</h2>
+  </div>
+  
+  <mat-dialog-content class="flex-1 overflow-y-auto p-5 [&::-webkit-scrollbar]:w-1
+  [&::-webkit-scrollbar-track]:rounded-full
+  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  [&::-webkit-scrollbar-thumb]:bg-gray-400">
+    <div *ngIf="loading" class="flex justify-center items-center py-4">
+      <p>Đang tải danh sách tài liệu...</p>
+    </div>
+    
+    <div *ngIf="!loading">
+      <div *ngIf="documents.length === 0" class="text-center py-4">
+        <p>Không có tài liệu nào cần duyệt</p>
+      </div>
+      
+      <div *ngIf="documents.length > 0" class="space-y-4">
+        <div *ngFor="let doc of documents" class="mb-4 border-b border-gray-200 pb-4">
+          <div class="flex justify-between items-center mb-2">
+            <div class="text-sm text-gray-600">
+              Người tải lên: {{doc.uploaderFullName}}
+            </div>
+            <div class="flex gap-2">
+              <button mat-raised-button color="primary" (click)="onApprove(doc.meetingDocumentId)">
+                <mat-icon class="mr-1">check</mat-icon>
+                Phê duyệt
+              </button>
+              <button mat-raised-button color="warn" (click)="onReject(doc.meetingDocumentId)">
+                <mat-icon class="mr-1">close</mat-icon>
+                Từ chối
+              </button>
+            </div>
+          </div>
+          <app-document-card [document]="doc.detail"></app-document-card>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <div class="p-4">
+    <mat-dialog-actions align="end" class="m-0">
+      <button mat-button (click)="onClose()">Đóng</button>
+    </mat-dialog-actions>
+  </div>
+</div> 

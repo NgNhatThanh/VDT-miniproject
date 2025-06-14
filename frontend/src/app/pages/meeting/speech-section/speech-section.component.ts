@@ -138,6 +138,7 @@ export class SpeechSectionComponent implements OnInit, OnDestroy {
       if (result) {
         this.meetingService.updateSpeechStatus({
           speechId: speechId,
+          meetingId: this.meetingId,
           status: 'APPROVED'
         }).subscribe({
           next: () => {
@@ -173,6 +174,7 @@ export class SpeechSectionComponent implements OnInit, OnDestroy {
       if (result) {
         this.meetingService.updateSpeechStatus({
           speechId: speechId,
+          meetingId: this.meetingId,
           status: 'REJECTED'
         }).subscribe({
           next: () => {
@@ -208,6 +210,7 @@ export class SpeechSectionComponent implements OnInit, OnDestroy {
       if (result) {
         this.meetingService.updateSpeechStatus({
           speechId: speechId,
+          meetingId: this.meetingId,
           status: 'ON_GOING'
         }).subscribe({
           next: () => {
@@ -243,6 +246,7 @@ export class SpeechSectionComponent implements OnInit, OnDestroy {
       if (result) {
         this.meetingService.updateSpeechStatus({
           speechId: speechId,
+          meetingId: this.meetingId,
           status: 'ENDED'
         }).subscribe({
           next: () => {

@@ -9,10 +9,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MeetingService, MeetingLocation } from '../../services/meeting/meeting.service';
+import { MeetingService, MeetingLocation, DocumentResponse } from '../../services/meeting/meeting.service';
 import { UserService } from '../../services/user/user.service';
 import { MeetingRoleService } from '../../services/meeting-role/meeting-role.service';
 import { User } from '../../models/user.model';
@@ -20,6 +21,7 @@ import { MeetingRole } from '../../models/meeting-role.model';
 import { MatDialog } from '@angular/material/dialog';
 import { UserPickerDialogComponent } from './user-picker-dialog.component';
 import { of, tap, catchError } from 'rxjs';
+import { DocumentCardComponent, DocumentInfo } from '../../components/document-card/document-card.component';
 
 @Component({
   selector: 'app-add-meeting',
@@ -36,7 +38,9 @@ import { of, tap, catchError } from 'rxjs';
     MatButtonModule,
     MatIconModule,
     MatListModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    DocumentCardComponent
   ]
 })
 export class AddMeetingComponent implements OnInit {
@@ -44,11 +48,12 @@ export class AddMeetingComponent implements OnInit {
   users: User[] = [];
   roles: MeetingRole[] = [];
   locations: MeetingLocation[] = [];
-  selectedFiles: File[] = [];
+  uploadedDocuments: DocumentInfo[] = [];
   roleUsers: { [roleId: number]: User[] } = {};
   loading: boolean = true;
   loadingError: boolean = false;
   isSubmitting: boolean = false;
+  isUploading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -132,14 +137,63 @@ export class AddMeetingComponent implements OnInit {
   }
 
   onFileSelected(event: any): void {
-    const files = event.target.files;
-    if (files) {
-      this.selectedFiles = [...this.selectedFiles, ...files];
+    const file = event.target.files[0];
+    if (file) {
+      // Kiểm tra dung lượng file (5MB = 5 * 1024 * 1024 bytes)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.snackBar.open('Dung lượng file không được vượt quá 5MB!', 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+
+      this.uploadFile(file);
     }
   }
 
-  removeFile(file: File): void {
-    this.selectedFiles = this.selectedFiles.filter(f => f !== file);
+  uploadFile(file: File): void {
+    this.isUploading = true;
+    this.meetingService.uploadDocument(file).subscribe({
+      next: (response: DocumentResponse) => {
+        this.uploadedDocuments.push({
+          id: response.id,
+          name: response.name,
+          size: response.size,
+          url: response.url
+        });
+        this.snackBar.open(`Upload tài liệu ${file.name} thành công!`, 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.isUploading = false;
+      },
+      error: (error: any) => {
+        console.error('Error uploading file:', error);
+        this.snackBar.open(`Upload tài liệu ${file.name} thất bại!`, 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        this.isUploading = false;
+      }
+    });
+  }
+
+  removeUploadedDocument(doc: DocumentInfo): void {
+    this.uploadedDocuments = this.uploadedDocuments.filter(d => d.id !== doc.id);
+    this.snackBar.open(`Đã xóa tài liệu ${doc.name}`, 'Đóng', {
+      duration: 2000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar']
+    });
   }
 
   onSubmit(): void {
@@ -162,7 +216,7 @@ export class AddMeetingComponent implements OnInit {
         endTime: formValue.endTime,
         locationId: formValue.location,
         joins: joins,
-        documentIds: [] // Tạm thời để trống
+        documentIds: this.uploadedDocuments.map(doc => doc.id) // Thêm documentIds từ uploadedDocuments
       };
 
       this.meetingService.addMeeting(meetingData).subscribe({
@@ -177,7 +231,7 @@ export class AddMeetingComponent implements OnInit {
           });
           // Reset form và dữ liệu
           this.meetingForm.reset();
-          this.selectedFiles = [];
+          this.uploadedDocuments = [];
           this.roleUsers = {};
         },
         error: (error) => {
@@ -196,7 +250,8 @@ export class AddMeetingComponent implements OnInit {
 
   onCancel(): void {
     this.meetingForm.reset();
-    this.selectedFiles = [];
+    this.uploadedDocuments = [];
+    this.roleUsers = {};
   }
 
   openUserPicker(role: MeetingRole) {

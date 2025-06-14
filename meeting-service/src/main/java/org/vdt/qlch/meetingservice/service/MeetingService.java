@@ -2,6 +2,7 @@ package org.vdt.qlch.meetingservice.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,8 @@ import org.vdt.commonlib.model.MeetingHistoryType;
 import org.vdt.commonlib.utils.AuthenticationUtil;
 import org.vdt.commonlib.utils.JwtUtil;
 import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
-import org.vdt.qlch.meetingservice.dto.request.CreateMeetingDTO;
+import org.vdt.qlch.meetingservice.dto.request.*;
 import org.vdt.qlch.meetingservice.dto.request.JoinDTO;
-import org.vdt.qlch.meetingservice.dto.request.JoinUpdateDTO;
 import org.vdt.qlch.meetingservice.dto.response.*;
 import org.vdt.qlch.meetingservice.model.*;
 import org.vdt.qlch.meetingservice.model.enums.DocumentStatus;
@@ -43,6 +43,8 @@ public class MeetingService {
     private final MeetingJoinRepository meetingJoinRepository;
 
     private final MeetingRoleRepository meetingRoleRepository;
+
+    private final PrivateNoteRepository privateNoteRepository;
 
     private final UserService userService;
 
@@ -110,8 +112,8 @@ public class MeetingService {
         });
         meetingJoinRepository.saveAll(joins);
 
-        if(dto.documentsIds() != null) {
-            List<Integer> documentIds = new ArrayList<>(new HashSet<>(dto.documentsIds()));
+        if(dto.documentIds() != null) {
+            List<Integer> documentIds = new ArrayList<>(new HashSet<>(dto.documentIds()));
             boolean documentsExists = documentService.checkExistById(documentIds);
             if (!documentsExists) {
                 throw new BadRequestException(Constants.ErrorCode.DOCUMENT_NOT_FOUND);
@@ -166,6 +168,7 @@ public class MeetingService {
         join.setStatus(status);
         join.setUpdatedBy(userId);
         join = meetingJoinRepository.save(join);
+        updateParticipantsCache(join.getMeeting().getId(), join);
         return MeetingDetailDTO.from(join);
     }
 
@@ -227,4 +230,61 @@ public class MeetingService {
         MeetingJoin join = meetingJoinRepository.findByUserIdAndMeetingId(userId, meetingId);
         return new RecordExistDTO(join != null && join.getStatus() != MeetingJoinStatus.REJECTED);
     }
+
+    public List<NoteDTO> getListNote(int meetingId) {
+        String userId = AuthenticationUtil.extractUserId();
+        List<MeetingPrivateNote> notes = privateNoteRepository.findAllByMeeting_IdAndCreatedBy(meetingId, userId);
+        return notes.stream()
+                .sorted(Comparator.comparing(MeetingPrivateNote::getUpdatedAt).reversed())
+                .map(NoteDTO::from).toList();
+    }
+
+    public NoteDTO addNote(@Valid CreateNoteDTO dto) {
+        Meeting meeting = meetingRepository.findById(dto.meetingId())
+                .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.MEETING_NOT_FOUND));
+        String userId = AuthenticationUtil.extractUserId();
+        MeetingPrivateNote note = MeetingPrivateNote.builder()
+                .meeting(meeting)
+                .content(dto.content())
+                .createdBy(userId)
+                .build();
+        privateNoteRepository.save(note);
+        return NoteDTO.from(note);
+    }
+
+    public NoteDTO updateNote(@Valid UpdateNoteDTO dto) {
+        String userId = AuthenticationUtil.extractUserId();
+        MeetingPrivateNote note = privateNoteRepository.findByIdAndCreatedBy(dto.noteId(), userId)
+                .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.NOTE_NOT_FOUND));
+        note.setContent(dto.content());
+        privateNoteRepository.save(note);
+        return NoteDTO.from(note);
+    }
+
+    public void deleteNote(int noteId) {
+        String userId = AuthenticationUtil.extractUserId();
+        MeetingPrivateNote note = privateNoteRepository.findByIdAndCreatedBy(noteId, userId)
+                .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.NOTE_NOT_FOUND));
+        privateNoteRepository.delete(note);
+    }
+
+    public List<ParticipantDTO> getListParticipants(int meetingId) {
+        return meetingRedisService.getListParticipants(meetingId);
+    }
+
+    @CachePut(value = "meeting-participants", key = "#meetingId")
+    public List<ParticipantDTO> updateParticipantsCache(int meetingId, MeetingJoin join) {
+        List<ParticipantDTO> participants = meetingRedisService.getListParticipants(meetingId);
+        return participants.stream()
+                .map(p -> p.joinId() == join.getId() ?
+                        ParticipantDTO.builder()
+                                .joinId(join.getId())
+                                .picture(p.picture())
+                                .fullName(p.fullName())
+                                .status(join.getStatus())
+                                .roles(p.roles())
+                                .build(): p)
+                .toList();
+    }
+
 }

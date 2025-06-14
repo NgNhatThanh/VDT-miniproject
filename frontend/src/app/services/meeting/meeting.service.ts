@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface MeetingLocation {
   id: number;
@@ -23,6 +24,24 @@ export interface CreateMeetingRequest {
   documentIds: number[];
 }
 
+export interface MeetingResponse {
+  joinId: number;
+  meetingId: number;
+  title: string;
+  description: string;
+  location: string;
+  startTime: string;
+  endTime: string;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'DELEGATED';
+}
+
+export interface DocumentResponse {
+  id: number;
+  name: string;
+  size: number;
+  url: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,5 +56,17 @@ export class MeetingService {
 
   addMeeting(meeting: CreateMeetingRequest): Observable<any> {
     return this.http.post(`${this.apiUrl}/create`, meeting);
+  }
+
+  uploadDocument(file: File): Observable<DocumentResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<DocumentResponse>(`http://localhost:9090/api/document/upload`, formData).pipe(
+      catchError(error => {
+        console.error('Error uploading document:', error);
+        throw error;
+      })
+    );
   }
 } 

@@ -2,6 +2,8 @@ package org.vdt.qlch.speechservice.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vdt.commonlib.dto.MeetingHistoryMessage;
@@ -19,11 +21,8 @@ import org.vdt.qlch.speechservice.producer.MeetingHistoryProducer;
 import org.vdt.qlch.speechservice.repository.MeetingSpeechRepository;
 import org.vdt.qlch.speechservice.utils.Constants;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,10 +34,13 @@ public class MeetingSpeechService {
 
     private final UserService userService;
 
+    private final MeetingSpeechCacheService cacheService;
+
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public void register(@Valid SpeechRegisterDTO dto) {
+    @CachePut(value = "meeting-speeches", key = "#dto.meetingId()")
+    public List<SpeechDTO> register(@Valid SpeechRegisterDTO dto) {
         String userId = AuthenticationUtil.extractUserId();
         MeetingSpeech meetingSpeech = MeetingSpeech.builder()
                 .meetingId(dto.meetingId())
@@ -51,35 +53,33 @@ public class MeetingSpeechService {
         speechRepository.save(meetingSpeech);
         String jwt = AuthenticationUtil.extractJwt();
         UserDTO user = jwtUtil.extractUser(jwt);
+        List<SpeechDTO> cur = cacheService.getList(dto.meetingId());
+        List<SpeechDTO> newList = new ArrayList<>(cur);
+        if(cur.stream().noneMatch(s -> s.id() == meetingSpeech.getId())){
+            newList.add(SpeechDTO.builder()
+                    .id(meetingSpeech.getId())
+                    .content(meetingSpeech.getContent())
+                    .duration(meetingSpeech.getDuration())
+                    .status(meetingSpeech.getStatus())
+                    .createdAt(meetingSpeech.getCreatedAt())
+                    .speakerFullName(user.fullName())
+                    .build());
+        }
         historyProducer.send(MeetingHistoryMessage.builder()
                         .meetingId(meetingSpeech.getMeetingId())
                         .type(MeetingHistoryType.SPEECH_REGISTERED)
                         .content(String.format("%s đã đăng ký phát biểu", user.fullName()))
                 .build());
+        return newList;
     }
 
 
     public List<SpeechDTO> getList(int meetingId) {
-        List<MeetingSpeech> meetingSpeeches = speechRepository.getAllByMeetingIdOrderByCreatedAt(meetingId);
-        Set<String> speakerIds = meetingSpeeches.stream()
-                .map(MeetingSpeech::getSpeakerId)
-                .collect(Collectors.toSet());
-        List<UserDTO> speakers = userService.getListByIds(speakerIds.stream().toList());
-        Map<String, UserDTO> speakerMap = new HashMap<>();
-        speakers.forEach(speaker -> speakerMap.put(speaker.id(), speaker));
-        return meetingSpeeches.stream()
-                .map(sp -> SpeechDTO.builder()
-                        .id(sp.getId())
-                        .content(sp.getContent())
-                        .duration(sp.getDuration())
-                        .status(sp.getStatus())
-                        .createdAt(sp.getCreatedAt())
-                        .speakerFullName(speakerMap.get(sp.getSpeakerId()).fullName())
-                        .build())
-                .toList();
+        return cacheService.getList(meetingId);
     }
 
-    public void updateSpeech(@Valid UpdateSpeechDTO dto) {
+    @CachePut(value = "meeting-speeches", key = "#dto.meetingId()")
+    public List<SpeechDTO> updateSpeech(@Valid UpdateSpeechDTO dto) {
         MeetingSpeech speech = speechRepository.findById(dto.speechId())
                 .orElseThrow(() -> new BadRequestException(Constants.ErrorCode.SPEECH_NOT_FOUND));
         // should check the pre-status, but I'm lazy
@@ -95,6 +95,24 @@ public class MeetingSpeechService {
         speech.setUpdatedBy(userId);
         speechRepository.save(speech);
         UserDTO user = userService.getById(speech.getSpeakerId());
+
+        List<SpeechDTO> cur = cacheService.getList(dto.meetingId());
+        List<SpeechDTO> newList = cur.stream()
+                .map(sp -> {
+                    if (sp.id() == speech.getId()) {
+                        return SpeechDTO.builder()
+                                .id(speech.getId())
+                                .content(speech.getContent())
+                                .duration(speech.getDuration())
+                                .status(speech.getStatus())
+                                .createdAt(speech.getCreatedAt())
+                                .speakerFullName(user.fullName())
+                                .build();
+                    }
+                    return sp;
+                })
+                .toList();
+
         MeetingHistoryType type = null;
         String format = switch (status) {
             case APPROVED -> {
@@ -120,5 +138,6 @@ public class MeetingSpeechService {
                         .content(String.format(format, user.fullName()))
                         .type(type)
                 .build());
+        return newList;
     }
 }

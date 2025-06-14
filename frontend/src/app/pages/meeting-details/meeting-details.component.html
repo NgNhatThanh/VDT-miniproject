@@ -34,6 +34,7 @@
     [routerLink]="tab.path"
     routerLinkActive #rla="routerLinkActive"
     [active]="rla.isActive"
+    [hidden]="meeting?.join?.status !== 'ACCEPTED' && tab.path !== 'thong-tin'"
   >
     {{ tab.name }}
   </a>

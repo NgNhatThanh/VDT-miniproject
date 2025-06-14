@@ -1,11 +1,13 @@
 package org.vdt.qlch.meetingservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.vdt.commonlib.dto.DocumentDTO;
 import org.vdt.commonlib.dto.RecordExistDTO;
 import org.vdt.qlch.meetingservice.config.ServiceUrlConfig;
 
@@ -35,6 +37,23 @@ public class DocumentService {
                 .retrieve()
                 .body(RecordExistDTO.class);
         return res != null && res.exist();
+    }
+
+    public List<DocumentDTO> getList(List<Integer> documentIds){
+        final String jwt = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                .getTokenValue();
+        final URI url = UriComponentsBuilder
+                .fromUriString(serviceUrlConfig.document())
+                .path("/get-list-documents")
+                .buildAndExpand()
+                .toUri();
+        List<DocumentDTO> res = restClient.post()
+                .uri(url)
+                .headers(h -> h.setBearerAuth(jwt))
+                .body(documentIds)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {});
+        return res;
     }
 
 }

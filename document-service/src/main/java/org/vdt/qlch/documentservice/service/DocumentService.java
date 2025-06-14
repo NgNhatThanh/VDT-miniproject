@@ -26,15 +26,16 @@ public class DocumentService {
     @Transactional
     public DocumentDTO upload(MultipartFile file, boolean save) {
         try{
+            String fileName = file.getOriginalFilename();
             String url = cloudinary.uploader().upload(file.getBytes(),
-                        Map.of("public_id", UUID.randomUUID().toString(),
-                                "resource_type", "raw"))
+                        Map.of("resource_type", "raw",
+                                "public_id", fileName))
                     .get("url").toString();
             Document document = Document.builder()
                     .url(url)
-                    .name(file.getOriginalFilename())
+                    .name(fileName)
                     .size((int)file.getSize())
-                    .createdBy(save ? AuthenticationUtil.extractUserId() : null)
+                    .createdBy(AuthenticationUtil.extractUserId())
                     .build();
             documentRepository.save(document);
             return DocumentDTO.builder()

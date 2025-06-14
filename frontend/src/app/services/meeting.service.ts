@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, filter } from 'rxjs/operators';
 import { KeycloakService } from './keycloak/keycloak.service';
 
 export interface MeetingResponse {
@@ -12,7 +12,7 @@ export interface MeetingResponse {
   location: string;
   startTime: string;
   endTime: string;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'AUTHORIZED';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'DELEGATED';
 }
 
 export interface Location {
@@ -49,6 +49,13 @@ export interface JoinUpdateRequest {
   reason?: string;
 }
 
+export interface DocumentResponse {
+  id: number;
+  name: string;
+  size: number;
+  url: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -59,6 +66,7 @@ export class MeetingService {
   public lastRejectReason: string | null = null;
   private currentMeetingSubject = new BehaviorSubject<MeetingDetails | null>(null);
   public currentMeeting$ = this.currentMeetingSubject.asObservable();
+  private isLoadingMap: Map<string, boolean> = new Map();
 
   constructor(
     private http: HttpClient,
@@ -89,15 +97,31 @@ export class MeetingService {
       return of(cachedMeeting);
     }
 
+    // Kiểm tra xem đang load chưa
+    if (this.isLoadingMap.get(meetingId)) {
+      return this.currentMeeting$.pipe(
+        filter((meeting): meeting is MeetingDetails => 
+          meeting !== null && meeting.id.toString() === meetingId
+        )
+      );
+    }
+
+    // Đánh dấu đang load
+    this.isLoadingMap.set(meetingId, true);
+
     // Nếu không có trong cache, gọi API
     return this.http.get<MeetingDetails>(`${this.apiUrl}/meeting/${meetingId}`).pipe(
       map(meeting => {
         // Lưu vào cache
         this.meetingCache.set(meetingId, meeting);
         this.currentMeetingSubject.next(meeting);
+        // Đánh dấu đã load xong
+        this.isLoadingMap.set(meetingId, false);
         return meeting;
       }),
       catchError(error => {
+        // Đánh dấu lỗi và reset trạng thái loading
+        this.isLoadingMap.set(meetingId, false);
         console.error('Error fetching meeting details:', error);
         throw error;
       })
@@ -115,6 +139,18 @@ export class MeetingService {
       }),
       catchError(error => {
         console.error('Error updating meeting join:', error);
+        throw error;
+      })
+    );
+  }
+
+  uploadDocument(file: File): Observable<DocumentResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<DocumentResponse>(`${this.apiUrl}/document/upload`, formData).pipe(
+      catchError(error => {
+        console.error('Error uploading document:', error);
         throw error;
       })
     );

@@ -8,6 +8,7 @@ import { MeetingService, MeetingDetails } from '../../../services/meeting.servic
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { RejectReasonDialogComponent } from '../reject-reason-dialog.component';
+import { ConfirmDialogComponent } from '../../../common/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-meeting-info',
@@ -50,11 +51,23 @@ export class MeetingInfoComponent implements OnInit {
   onAcceptClick() {
     if (!this.meeting) return;
     
-    this.meetingService.updateMeetingJoin({
-      joinId: this.meeting.join.id,
-      status: 'ACCEPTED'
-    }).subscribe(updatedMeeting => {
-      this.meeting = updatedMeeting;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Xác nhận tham dự',
+        message: 'Bạn có chắc chắn muốn tham dự cuộc họp này không?'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.meetingService.updateMeetingJoin({
+          joinId: this.meeting?.join?.id || 0,
+          status: 'ACCEPTED'
+        }).subscribe(updatedMeeting => {
+          this.meeting = updatedMeeting;
+        });
+      }
     });
   }
 

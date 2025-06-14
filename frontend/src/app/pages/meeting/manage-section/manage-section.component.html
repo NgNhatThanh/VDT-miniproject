@@ -15,11 +15,11 @@
       Lấy ý kiến biểu quyết
     </button>
 
-    <!-- Nút duyệt tài liệu - chỉ DOCUMENT_APPROVER mới có -->
-    <button mat-raised-button color="warn" (click)="approveDocument()" *ngIf="isDocumentApprover">
-      <mat-icon>approval</mat-icon>
-      Duyệt tài liệu
-    </button>
+    <!-- Component duyệt tài liệu -->
+    <app-document-approval-button 
+      [isDocumentApprover]="isDocumentApprover"
+      (approveDocument)="approveDocument()">
+    </app-document-approval-button>
   </div>
 
 </div>

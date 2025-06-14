@@ -11,10 +11,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ConfirmDialogComponent } from '../../../../common/components/confirm-dialog/confirm-dialog.component';
 import { CreateVotingRequest, MeetingManagementService } from '../../../../services/meeting-management.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { DocumentCardComponent, DocumentInfo } from '../../../../components/document-card/document-card.component';
+import { MeetingService } from '../../../../services/meeting.service';
 
 @Component({
   selector: 'app-create-voting-dialog',
@@ -31,14 +34,18 @@ import { of } from 'rxjs';
     ReactiveFormsModule,
     MatDialogModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    DocumentCardComponent
   ],
 })
 export class CreateVotingDialogComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
   votingForm: FormGroup;
   selectedFiles: File[] = [];
+  uploadedDocuments: DocumentInfo[] = [];
   isSubmitting = false;
+  isUploading = false;
   meetingId: number;
 
   constructor(
@@ -46,7 +53,8 @@ export class CreateVotingDialogComponent implements OnInit {
     private dialogRef: MatDialogRef<CreateVotingDialogComponent>,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private meetingService: MeetingManagementService,
+    private meetingService: MeetingService,
+    private meetingManagementService: MeetingManagementService,
     @Inject(MAT_DIALOG_DATA) public data: { meetingId: number }
   ) {
     this.meetingId = data.meetingId;
@@ -105,15 +113,63 @@ export class CreateVotingDialogComponent implements OnInit {
 
   // Xử lý khi chọn file
   onFileSelected(event: any) {
-    const files = event.target.files as FileList;
-    if (files) {
-      this.selectedFiles = [...this.selectedFiles, ...Array.from(files)];
+    const file = event.target.files[0];
+    if (file) {
+      // Kiểm tra dung lượng file (5MB = 5 * 1024 * 1024 bytes)
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.snackBar.open('Dung lượng file không được vượt quá 5MB!', 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
+
+      this.uploadFile(file);
     }
   }
 
-  // Xóa file đã chọn
-  removeFile(file: File) {
-    this.selectedFiles = this.selectedFiles.filter(f => f !== file);
+  uploadFile(file: File): void {
+    this.isUploading = true;
+    this.meetingService.uploadDocument(file).subscribe({
+      next: (response) => {
+        this.uploadedDocuments.push({
+          id: response.id,
+          name: response.name,
+          size: response.size,
+          url: response.url
+        });
+        this.snackBar.open(`Upload tài liệu ${file.name} thành công!`, 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.isUploading = false;
+      },
+      error: (error) => {
+        console.error('Error uploading file:', error);
+        this.snackBar.open(`Upload tài liệu ${file.name} thất bại!`, 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        this.isUploading = false;
+      }
+    });
+  }
+
+  removeUploadedDocument(doc: DocumentInfo): void {
+    this.uploadedDocuments = this.uploadedDocuments.filter(d => d.id !== doc.id);
+    this.snackBar.open(`Đã xóa tài liệu ${doc.name}`, 'Đóng', {
+      duration: 2000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar']
+    });
   }
 
   // Hiển thị dialog xác nhận
@@ -155,6 +211,17 @@ export class CreateVotingDialogComponent implements OnInit {
       return false;
     }
 
+    // Kiểm tra câu hỏi trùng nhau
+    if (this.checkDuplicateQuestions()) {
+      this.snackBar.open('Có các câu hỏi trùng nhau', 'Đóng', {
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
+      return false;
+    }
+
     for (let i = 0; i < questions.length; i++) {
       const options = this.getQuestionOptions(i).controls;
       if (options.length < 2) {
@@ -166,9 +233,36 @@ export class CreateVotingDialogComponent implements OnInit {
         });
         return false;
       }
+
+      // Kiểm tra các lựa chọn trùng nhau
+      if (this.checkDuplicateOptions(i)) {
+        this.snackBar.open(`Câu hỏi ${i + 1} có các lựa chọn trùng nhau`, 'Đóng', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        return false;
+      }
     }
 
     return true;
+  }
+
+  // Kiểm tra các câu hỏi trùng nhau
+  checkDuplicateQuestions(): boolean {
+    const questions = this.questions.controls;
+    const questionTitles = questions.map(question => question.get('title')?.value?.trim().toLowerCase());
+    const uniqueQuestions = new Set(questionTitles);
+    return uniqueQuestions.size !== questionTitles.length;
+  }
+
+  // Kiểm tra các lựa chọn trùng nhau trong một câu hỏi
+  checkDuplicateOptions(questionIndex: number): boolean {
+    const options = this.getQuestionOptions(questionIndex).controls;
+    const optionContents = options.map(option => option.get('content')?.value?.trim().toLowerCase());
+    const uniqueOptions = new Set(optionContents);
+    return uniqueOptions.size !== optionContents.length;
   }
 
   // Xử lý khi submit form
@@ -193,7 +287,7 @@ export class CreateVotingDialogComponent implements OnInit {
           startTime: formValue.startTime,
           endTime: formValue.endTime,
           type: formValue.votingType,
-          documentIds: [], // Tạm thời để mảng rỗng
+          documentIds: this.uploadedDocuments.map(doc => doc.id), // Thêm documentIds từ uploadedDocuments
           questions: formValue.questions.map((q: any) => ({
             title: q.title,
             options: q.options.map((o: any) => ({
@@ -202,7 +296,7 @@ export class CreateVotingDialogComponent implements OnInit {
           }))
         };
 
-        this.meetingService.createVoting(votingData)
+        this.meetingManagementService.createVoting(votingData)
           .pipe(
             catchError(error => {
               this.snackBar.open(
