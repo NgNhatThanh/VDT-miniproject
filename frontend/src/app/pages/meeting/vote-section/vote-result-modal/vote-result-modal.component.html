@@ -1,0 +1,146 @@
+<div class="p-6 h-full flex flex-col">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center gap-3">
+      <h2 class="text-2xl font-bold">Kết quả biểu quyết</h2>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+              [ngClass]="{
+                'bg-gray-50 text-gray-700 border border-gray-200': !isVoteStarted() && !isVoteEnded(),
+                'bg-blue-50 text-blue-700 border border-blue-200': isVoteStarted() && !isVoteEnded(),
+                'bg-red-50 text-red-700 border border-red-200': isVoteEnded()
+              }">
+          {{ !isVoteStarted() ? 'Chưa diễn ra' : 
+             isVoteStarted() && !isVoteEnded() ? 'Đang diễn ra' : 'Đã kết thúc' }}
+        </span>
+        <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+              [ngClass]="{
+                'bg-green-50 text-green-700 border border-green-200': voteData?.detail?.type === 'PUBLIC',
+                'bg-purple-50 text-purple-700 border border-purple-200': voteData?.detail?.type === 'PRIVATE'
+              }">
+          {{ voteData?.detail?.type === 'PUBLIC' ? 'Công khai' : 'Kín' }}
+        </span>
+        <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+              [ngClass]="{
+                'bg-green-50 text-green-700 border border-green-200': voteData?.voted,
+                'bg-gray-50 text-gray-700 border border-gray-200': !voteData?.voted
+              }">
+          <div class="flex items-center gap-1">
+            <mat-icon class="text-xl">{{ voteData?.voted ? 'how_to_vote' : 'how_to_vote_outlined' }}</mat-icon>
+            {{ voteData?.voted ? 'Đã bỏ phiếu' : 'Chưa bỏ phiếu' }}
+          </div>
+        </span>
+        <span *ngIf="lastUpdated" class="text-xs text-gray-500">
+          Cập nhật lúc: {{ formatDateTime(lastUpdated) }}
+        </span>
+      </div>
+    </div>
+    <button mat-icon-button (click)="dialogRef.close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex-1 flex items-center justify-center">
+    <p class="text-gray-500">Đang tải dữ liệu...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="flex-1 flex items-center justify-center">
+    <p class="text-red-500">{{ error }}</p>
+  </div>
+
+  <!-- Content -->
+  <div #contentContainer *ngIf="!loading && !error && voteData" class="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-1.5
+    [&::-webkit-scrollbar-track]:bg-gray-100
+    [&::-webkit-scrollbar-thumb]:bg-gray-300
+    [&::-webkit-scrollbar-thumb]:rounded-full
+    [&::-webkit-scrollbar-track]:rounded-full">
+    <div class="space-y-6">
+      <!-- Thông tin cơ bản -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold mb-2">Thông tin biểu quyết</h3>
+        <div class="space-y-2">
+          <p><span class="font-medium">Tiêu đề:</span> {{ voteData.detail.title }}</p>
+          <p><span class="font-medium">Mô tả:</span> {{ voteData.detail.description }}</p>
+          <p><span class="font-medium">Thời gian:</span> {{ voteData.detail.startTime | date:'dd/MM/yyyy HH:mm' }} - {{ voteData.detail.endTime | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+
+      <!-- Kết quả biểu quyết -->
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Kết quả</h3>
+        <div class="space-y-6">
+          <div *ngFor="let question of voteData.detail.questions; let i = index" class="border-b border-gray-400 pb-6 last:border-b-0">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="font-bold text-lg">{{ i + 1 }}.</span>
+              <h4 class="font-bold text-lg">{{ question.title }}</h4>
+            </div>
+            <div class="space-y-3">
+              <div *ngFor="let option of question.options" 
+                   class="flex items-center gap-4 p-3 rounded-lg transition-all duration-200"
+                   [ngClass]="{
+                     'bg-blue-50 border border-blue-200': isUserVoted(question.id, option.id),
+                     'hover:bg-gray-50': !isUserVoted(question.id, option.id)
+                   }">
+                <!-- Nội dung câu trả lời -->
+                <div class="w-1/5">
+                  <div class="flex items-center gap-2">
+                    <p class="text-gray-700 break-words">{{ option.content }}</p>
+                    <!-- <mat-icon *ngIf="isUserVoted(question.id, option.id)" 
+                             class="text-blue-500 text-lg"
+                             matTooltip="Bạn đã chọn lựa chọn này">
+                      check_circle
+                    </mat-icon> -->
+                  </div>
+                </div>
+
+                <!-- Thanh tiến trình -->
+                <div class="w-3/5">
+                  <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 transition-all duration-300"
+                         [style.width.%]="getVotePercentage(question.id, option.id)">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Phần trăm -->
+                <div class="w-1/10 text-right">
+                  <span class="text-sm font-medium text-gray-600"
+                        [ngClass]="{'text-blue-600 font-semibold': isUserVoted(question.id, option.id)}">
+                    {{ getVotePercentage(question.id, option.id) | number:'1.0-1' }}% ({{ getVoteCount(question.id, option.id) }} phiếu)
+                  </span>
+                </div>
+
+                <!-- Nút xem người bỏ phiếu -->
+                <div class="w-1/10 text-right" *ngIf="voteData.detail.type === 'PUBLIC'">
+                  <button mat-icon-button 
+                          [matTooltip]="'Xem người bỏ phiếu'"
+                          (click)="showVoters(question.id, option.id)">
+                    <mat-icon>people</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tài liệu đính kèm -->
+      <div *ngIf="voteData.detail.documents?.length" class="bg-gray-50 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold mb-4">Tài liệu đính kèm</h3>
+        <div class="grid grid-cols-1 gap-4">
+          <app-document-card 
+            *ngFor="let doc of voteData.detail.documents"
+            [document]="doc">
+          </app-document-card>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="mt-6 flex justify-end">
+    <button mat-button (click)="dialogRef.close()">Đóng</button>
+  </div>
+</div> 

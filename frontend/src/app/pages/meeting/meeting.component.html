@@ -1,1 +1,17 @@
-<p>meeting works!</p>
+<div class="flex flex-col h-screen bg-gray-100">
+  <app-header class="flex-none min-h-[60px] z-100"></app-header>
+  
+  <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-col w-[260px] min-w-[200px]">
+      <app-manage-section class="flex-none"></app-manage-section>
+      <app-history-section class="flex-1 min-h-0 h-full"></app-history-section>
+    </div>
+    <div class="flex flex-col flex-1 min-w-0 p-2 gap-2 h-full">
+      <div class="flex flex-row gap-2 h-1/2">
+        <app-document-section class="flex-1 min-w-0 rounded-sm"></app-document-section>
+        <app-speech-section class="flex-1 min-w-0 rounded-sm"></app-speech-section>
+      </div>
+      <app-vote-section class="h-1/2 rounded-sm"></app-vote-section>
+    </div>
+  </div>
+</div>

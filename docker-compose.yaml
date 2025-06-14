@@ -1,4 +1,9 @@
 services:
+
+  api-gateway:
+    build: ./api-gateway
+
+
   postgres:
     image: postgres:16-alpine
     hostname: ${POSTGRES_HOST}
@@ -6,7 +11,7 @@ services:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - ./postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
-      - ./db/postgres:/var/lib/postgresql/data
+      - ./docker/postgres:/var/lib/postgresql/data
     command: postgres -c 'max_connections=500'
     environment:
       - POSTGRES_USER
@@ -33,6 +38,72 @@ services:
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
     depends_on:
       - postgres
+    networks:
+      - qlch-network
+
+  zookeeper:
+    image: zookeeper:3.9.3
+    restart: always
+    ports:
+      - 2181:2181
+    networks:
+      - qlch-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.9.1
+    hostname: ${KAFKA_SERVICE_HOST}
+    depends_on:
+      - zookeeper
+    ports:
+      - ${KAFKA_SERVICE_PORT}:${KAFKA_SERVICE_PORT}
+    environment:
+      - KAFKA_BROKER_ID
+      - KAFKA_ZOOKEEPER_CONNECT
+      - KAFKA_ADVERTISED_LISTENERS
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+      - KAFKA_INTER_BROKER_LISTENER_NAME
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+    networks:
+      - qlch-network
+
+  init-topics:
+    image: confluentinc/cp-kafka:7.9.1
+    volumes:
+      - ./create_topics.sh:/create_topics.sh
+    command: [ "/bin/bash", "-c", "/create_topics.sh"]
+    depends_on:
+      kafka:
+        condition: service_started
+    networks:
+      - qlch-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - 8095:8080
+    depends_on:
+      - kafka
+    networks:
+      - qlch-network
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker/redis:/data
+    networks:
+      - qlch-network
+
+  redis-gui:
+    depends_on:
+      - redis
+    image: redis/redisinsight
+    ports:
+      - 5540:5540
     networks:
       - qlch-network
 

@@ -1,0 +1,12 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /api/meeting-history
+
+spring:
+  application:
+    name: meeting-history-service
+
+vdt:
+  services:
+    meeting: ${gateway-url}/api/meeting

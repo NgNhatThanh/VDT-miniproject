@@ -1,0 +1,12 @@
+server:
+  port: 8086
+  servlet:
+    context-path: /api/speech
+
+spring:
+  application:
+    name: speech-service
+
+vdt:
+  services:
+    user: ${gateway-url}/api/user

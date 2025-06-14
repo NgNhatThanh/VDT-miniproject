@@ -1,6 +1,6 @@
 <mat-sidenav-container 
-    class="h-full"
-    style="box-shadow: 0 4px 6px 0px rgba(0, 0, 0, 0.1), 0 2px 5px 2px rgba(0, 0, 0, 0.463);"
+  class="h-full"
+  style="box-shadow: 0 4px 6px 0px rgba(0, 0, 0, 0.1), 0 2px 5px 2px rgba(0, 0, 0, 0.463);"
 >
   <mat-sidenav mode="side" opened style="width: 250px; background-color: #fff;">
     <div class="flex flex-col items-center py-8">
@@ -22,14 +22,14 @@
             </mat-expansion-panel-header>
             <mat-nav-list>
                 <a mat-list-item *ngFor="let item of group.children"
-                    [ngClass]="{'text-blue-600 font-semibold': router.url === item.url}"
+                    [ngClass]="{'text-red-500 font-semibold': router.url === item.url}"
                     (click)="item.onClick?.()"
                     routerLink="{{item.url}}"
                 >
-                  <div class="flex items-center justify-center">
+                  <div class="flex items-center ">
                     <mat-icon class="mr-2 " *ngIf="item.icon" [ngStyle]="{'color': item.color || ''}">{{item.icon}}</mat-icon>
                     <p
-                        [ngClass]="{'text-blue-600 font-semibold': router.url === item.url}"
+                        [ngClass]="{'text-red-800 font-semibold': router.url === item.url}"
                         class="whitespace-normal break-words"
                     >
                       {{item.label}}

@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: common-lib
+
+cors:
+  allowed-origins: '*'

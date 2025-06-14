@@ -1,0 +1,24 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9095/realms/VDT
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+keycloak:
+  auth-server-url: http://localhost:9095
+  realm: VDT
+  resource: user-management # client-id
+  credentials:
+    secret: p8o2LT7RdfZznZxtLJpYBDC3OyfngFrC

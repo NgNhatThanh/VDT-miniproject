@@ -1,0 +1,57 @@
+<div class="bg-white h-full flex flex-col">
+  <!-- Title -->
+  <div class="text-lg font-medium text-gray-700 p-1 flex items-center">
+    <p class="ml-2">Lịch sử cuộc họp</p>
+  </div>
+
+  <!-- Scrollable content -->
+  <div 
+    class="flex-1 overflow-y-auto [&::-webkit-scrollbar]:w-1
+    [&::-webkit-scrollbar-track]:rounded-full
+    [&::-webkit-scrollbar-track]:bg-gray-100
+    [&::-webkit-scrollbar-thumb]:rounded-full
+    [&::-webkit-scrollbar-thumb]:bg-gray-400"
+  >
+    <!-- Empty state -->
+    <div *ngIf="histories.length === 0" class="text-center text-gray-500 py-8">
+      <mat-icon>history</mat-icon>
+      <p>Chưa có lịch sử hoạt động</p>
+    </div>
+
+    <!-- History list -->
+    <div *ngIf="histories.length > 0">
+      <div *ngFor="let history of histories" 
+          class="px-4 flex py-3 border-b border-gray-200 transition-all duration-200 hover:bg-gray-100"
+          [class.highlight-new]="history.id === latestMessageId">
+        <!-- Icon based on type -->
+        <mat-icon class="text-gray-500 mr-4" [ngSwitch]="history.type">
+          <ng-container *ngSwitchCase="'USER_JOINED'">person_add</ng-container>
+          <ng-container *ngSwitchCase="'USER_LEFT'">person_remove</ng-container>
+          <ng-container *ngSwitchCase="'MEETING_STARTED'">play_circle</ng-container>
+          <ng-container *ngSwitchCase="'MEETING_ENDED'">stop_circle</ng-container>
+          <ng-container *ngSwitchDefault>info</ng-container>
+        </mat-icon>
+
+        <!-- Content and time wrapper -->
+        <div class="flex-1">
+          <div class="mb-1">{{ history.content }}</div>
+          <div class="text-gray-500 text-sm">{{ formatDateTime(history.createdAt) }}</div>
+        </div>
+      </div>
+
+      <!-- Loading spinner -->
+      <div *ngIf="isLoading" class="flex justify-center py-4">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+
+      <!-- End of list message -->
+      <div *ngIf="isEnd && histories.length > 0" class="text-center text-gray-500 py-8">
+        <mat-divider></mat-divider>
+        <p>Đã xem hết lịch sử</p>
+      </div>
+
+      <!-- Infinite scroll trigger -->
+      <div *ngIf="!isEnd" appInfiniteScroll (scrolled)="onScroll()" class="h-4"></div>
+    </div>
+  </div>
+</div>

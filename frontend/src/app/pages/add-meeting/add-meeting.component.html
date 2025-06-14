@@ -1,0 +1,168 @@
+<div class="w-full mx-auto my-8 px-4 sm:px-6 lg:px-8">
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-8">Thêm cuộc họp mới</h2>
+    
+    <!-- Loading spinner -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Đang tải dữ liệu...</p>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="loadingError" class="error-container">
+      <mat-icon>error</mat-icon>
+      <p>Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>
+      <button mat-raised-button color="primary" (click)="ngOnInit()">Thử lại</button>
+    </div>
+
+    <!-- Main content -->
+    <div *ngIf="!loading && !loadingError">
+      <form [formGroup]="meetingForm" class="flex flex-col gap-6">
+        <mat-form-field class="w-full">
+          <mat-label>Tiêu đề cuộc họp</mat-label>
+          <input matInput formControlName="title" placeholder="Nhập tiêu đề">
+        </mat-form-field>
+    
+        <mat-form-field class="w-full">
+          <mat-label>Mô tả</mat-label>
+          <textarea matInput formControlName="description" rows="4" placeholder="Nhập mô tả cuộc họp"></textarea>
+        </mat-form-field>
+    
+        <mat-form-field class="w-full">
+          <mat-label>Địa điểm</mat-label>
+          <mat-select formControlName="location">
+            <mat-option *ngFor="let location of locations" [value]="location.id">
+              {{location.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+    
+        <div class="w-full flex flex-col gap-2">
+          <label class="font-medium text-gray-700 dark:text-gray-300">Thời gian</label>
+          <div class="flex flex-col sm:flex-row gap-4 w-full">
+            <mat-form-field class="w-full sm:flex-1">
+              <mat-label>Thời gian bắt đầu</mat-label>
+              <input matInput type="datetime-local" formControlName="startTime">
+            </mat-form-field>
+            <mat-form-field class="w-full sm:flex-1">
+              <mat-label>Thời gian kết thúc</mat-label>
+              <input matInput type="datetime-local" formControlName="endTime">
+            </mat-form-field>
+          </div>
+        </div>
+    
+        <div class="mt-4">
+          <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">Tài liệu đính kèm</h3>
+          <button mat-raised-button color="primary" (click)="fileInput.click()" class="flex items-center gap-2">
+            <mat-icon>upload_file</mat-icon>
+            Chọn tài liệu
+          </button>
+          <input #fileInput type="file" (change)="onFileSelected($event)" class="hidden">
+          
+          <!-- Loading indicator khi đang upload -->
+          <div *ngIf="isUploading" class="mt-4 flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Đang upload tài liệu...</span>
+          </div>
+
+          <!-- Danh sách tài liệu đã upload -->
+          <div class="mt-4" *ngIf="uploadedDocuments.length > 0">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tài liệu đã upload:</p>
+            <div class="grid grid-cols-2 gap-3 w-full">
+              <div *ngFor="let doc of uploadedDocuments" class="relative flex gap-4 w-full">
+                <app-document-card [document]="doc"></app-document-card>
+                <button 
+                  mat-icon-button 
+                  color="warn" 
+                  (click)="removeUploadedDocument(doc)"
+                  class="absolute top-2 right-2 bg-white dark:bg-gray-800 shadow-md"
+                  [attr.aria-label]="'Xóa tài liệu ' + doc.name"
+                  matTooltip="Xóa tài liệu">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mt-6">Thành phần tham dự</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngFor="let role of roles" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-semibold">{{ role.name }}</span>
+              <button mat-mini-fab color="primary" (click)="openUserPicker(role)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="(roleUsers[role.id] || []).length > 0; else emptyList">
+              <mat-list style="max-height: 300px; overflow-y: auto;">
+                <mat-list-item *ngFor="let user of roleUsers[role.id]">
+                  <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center">
+                      <img matListAvatar [src]="user.picture" alt="avatar"  class="w-10 h-10 rounded-full"/>
+                      <div class="flex flex-col ml-3">
+                        <span class="font-medium">{{ user.firstName }} {{ user.lastName }}</span>
+                        <span class="text-xs text-gray-500">{{ user.email }}</span>
+                      </div>
+                    </div>
+                    <button mat-icon-button color="warn" (click)="removeUserFromRole(role, user)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </div>
+            <ng-template #emptyList>
+              <div class="flex flex-col items-center justify-center py-6 text-gray-400">
+                <mat-icon style="font-size:40px;">inbox</mat-icon>
+                <span>Trống</span>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+    
+        <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+          <button mat-button type="button" (click)="onCancel()" class="w-full sm:w-auto" [disabled]="isSubmitting">Hủy</button>
+          <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" class="w-full sm:w-auto" [disabled]="isSubmitting">
+            <mat-spinner diameter="20" *ngIf="isSubmitting" class="mr-2"></mat-spinner>
+            {{ isSubmitting ? 'Đang lưu...' : 'Lưu' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<style>
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+}
+
+.error-container {
+  color: #f44336;
+}
+
+.error-container mat-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 1rem;
+}
+
+::ng-deep .success-snackbar {
+  background: #4caf50;
+  color: white;
+}
+
+::ng-deep .error-snackbar {
+  background: #f44336;
+  color: white;
+}
+
+::ng-deep .mat-simple-snackbar-action {
+  color: white;
+}
+</style>

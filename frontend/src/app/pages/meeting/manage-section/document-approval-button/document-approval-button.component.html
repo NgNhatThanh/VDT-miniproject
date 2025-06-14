@@ -1,0 +1,6 @@
+<button
+    style="border-radius: 5px; width: 100%;"
+mat-raised-button color="primary" (click)="onApproveDocument()" *ngIf="isDocumentApprover" matBadge="!" matBadgeColor="warn" [matBadgeHidden]="!showBadge">
+  <mat-icon>approval</mat-icon>
+  Duyệt tài liệu
+</button> 

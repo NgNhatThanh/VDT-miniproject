@@ -4,3 +4,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:9095/realms/VDT
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
