@@ -1,0 +1,69 @@
+<div class="p-4 bg-white h-full rounded-sm flex flex-col">
+  <h2 class="text-xl font-medium mb-2">Danh sách biểu quyết</h2>
+  
+  <div *ngIf="votingList.length === 0" class="text-center py-8 text-gray-500">
+    <p>Chưa có biểu quyết nào</p>
+  </div>
+
+  <div class="space-y-2 pt-1 pb-1 overflow-y-auto flex-1 [&::-webkit-scrollbar]:w-1
+    [&::-webkit-scrollbar-track]:rounded-full
+    [&::-webkit-scrollbar-track]:bg-gray-100
+    [&::-webkit-scrollbar-thumb]:rounded-full
+    [&::-webkit-scrollbar-thumb]:bg-gray-400">
+    <mat-card *ngFor="let vote of votingList" style="background-color: white; border-style: solid; border-width: 3px;" >
+      <mat-card-content style="padding: 10px 15px;">
+        <div class="flex justify-between items-start">
+          <!-- Phần thông tin bên trái -->
+          <div class="flex-1 min-w-0">
+            <!-- Tiêu đề và trạng thái -->
+            <div class="flex items-center gap-2 mb-1">
+              <div class="flex items-center gap-1">
+                <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+                      [ngClass]="{
+                        'bg-gray-50 text-gray-700 border border-gray-200': !isVoteStarted(vote) && !isVoteEnded(vote),
+                        'bg-blue-50 text-blue-700 border border-blue-200': isVoteStarted(vote) && !isVoteEnded(vote),
+                        'bg-red-50 text-red-700 border border-red-200': isVoteEnded(vote)
+                      }">
+                  {{ !isVoteStarted(vote) ? 'Chưa diễn ra' : 
+                     isVoteStarted(vote) && !isVoteEnded(vote) ? 'Đang diễn ra' : 'Đã kết thúc' }}
+                </span>
+                <span class="px-2.5 py-1 text-xs font-medium rounded-sm whitespace-nowrap"
+                      [ngClass]="{
+                        'bg-green-50 text-green-700 border border-green-200': vote.type === 'PUBLIC',
+                        'bg-purple-50 text-purple-700 border border-purple-200': vote.type === 'PRIVATE'
+                      }">
+                  {{ vote.type === 'PUBLIC' ? 'Công khai' : 'Kín' }}
+                </span>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-700 truncate">{{ vote.title }}</h3>
+              <div class="flex items-center gap-1 shrink-0">
+                <mat-icon [class]="vote.isVoted ? 'text-green-500' : 'text-gray-400'" class="text-xl">
+                  {{ vote.isVoted ? 'how_to_vote' : 'how_to_vote_outlined' }}
+                </mat-icon>
+                <span class="text-sm" [class]="vote.isVoted ? 'text-green-500' : 'text-gray-500'">
+                  {{ vote.isVoted ? 'Đã bỏ phiếu' : 'Chưa bỏ phiếu' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Thời gian và mô tả -->
+            <div class="text-sm text-gray-600 mb-2">
+              {{ formatDateTime(vote.startTime) }} - {{ formatDateTime(vote.endTime) }}
+            </div>
+            <p class="text-sm text-gray-600 truncate">{{ vote.description }}</p>
+          </div>
+
+          <!-- Nút xem kết quả bên phải -->
+          <div class="ml-4">
+            <button mat-button 
+                    color="primary"
+                    (click)="openVoteResultModal(vote)">
+              <mat-icon class="text-xl">visibility</mat-icon>
+              Xem
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,79 @@
+<div class="min-w-[400px] max-w-[600px] h-[80vh] flex flex-col">
+  <!-- Header -->
+  <div class="flex justify-between items-center px-4 py-2">
+    <div class="flex items-center gap-3">
+      <h2 mat-dialog-title class="text-base font-medium text-gray-700 m-0">Ghi chú cá nhân</h2>
+      <button mat-icon-button color="primary" (click)="showAddNoteForm = true">
+        <mat-icon class="!text-lg">add</mat-icon>
+      </button>
+    </div>
+    <button mat-icon-button (click)="onCancel()">
+      <mat-icon class="!text-lg">close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Danh sách ghi chú -->
+  <div class="px-6 py-4 flex-1 overflow-hidden">
+    <div class="notes-container h-full overflow-y-auto pr-2 custom-scrollbar">
+      <div *ngIf="notes.length === 0" class="h-full flex items-center justify-center text-gray-500">
+        <div class="text-center">
+          <mat-icon class="text-4xl mb-2">note_alt</mat-icon>
+          <p>Chưa có ghi chú nào</p>
+        </div>
+      </div>
+      <div *ngFor="let note of notes" class="mb-4 bg-gray-50 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+        <div class="p-4 pb-12">
+          <p class="text-xs text-gray-500 mb-2">{{ note.updatedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p class="text-gray-800 whitespace-pre-wrap">{{ note.content }}</p>
+        </div>
+        <div class="px-4 py-2 border-t border-gray-200 flex justify-end gap-2">
+          <button mat-icon-button color="primary" (click)="onEditNote(note)" class="!w-8 !h-8 !p-1">
+            <mat-icon class="!text-lg">edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="onDeleteNote(note)" class="!w-8 !h-8 !p-1">
+            <mat-icon class="!text-lg">delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form thêm ghi chú mới -->
+  <div *ngIf="showAddNoteForm" class="px-6 py-4 border-t">
+    <mat-form-field class="w-full">
+      <mat-label>{{ editingNote ? 'Chỉnh sửa ghi chú' : 'Thêm ghi chú mới' }}</mat-label>
+      <textarea 
+        matInput 
+        [(ngModel)]="noteContent" 
+        rows="5" 
+        class="min-h-[100px]"
+        required
+        placeholder="Nhập nội dung ghi chú của bạn...">
+      </textarea>
+    </mat-form-field>
+    <div class="flex justify-end gap-2">
+      <button mat-button (click)="resetForm()">Hủy</button>
+      <button mat-raised-button color="primary" (click)="onSave()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+</style>

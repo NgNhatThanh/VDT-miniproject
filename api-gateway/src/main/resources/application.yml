@@ -4,3 +4,44 @@ server:
 spring:
   application:
     name: api-gateway
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  cloud:
+    gateway:
+      routes:
+        - id: meeting-service
+          uri: lb://meeting-service
+          predicates:
+            - Path=/api/meeting/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+        - id: document-service
+          uri: lb://document-service
+          predicates:
+            - Path=/api/document/**
+        - id: meeting-history-ws
+          uri: lb:ws://meeting-history-service
+          predicates:
+            - Path=/api/meeting-history/ws/**
+        - id: meeting-history-service
+          uri: lb://meeting-history-service
+          predicates:
+            - Path=/api/meeting-history/**
+        - id: vote-service
+          uri: lb://vote-service
+          predicates:
+            - Path=/api/vote/**
+        - id: speech-service
+          uri: lb://speech-service
+          predicates:
+            - Path=/api/speech/**
+  main:
+    web-application-type: reactive
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG

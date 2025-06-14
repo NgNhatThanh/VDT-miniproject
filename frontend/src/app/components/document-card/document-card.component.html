@@ -1,0 +1,31 @@
+<div class="w-full document-card bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-200">
+  <div class="flex w-full items-center justify-between">
+    <!-- File info section -->
+    <div class="flex w-full items-center gap-3 flex-1">
+      <mat-icon class="text-gray-500 dark:text-gray-400 flex-shrink-0" [attr.data-testid]="'file-icon-' + getFileExtension()">
+        {{ getFileIcon() }}
+      </mat-icon>
+      
+      <div class="flex-1 w-full">
+        <p class="text-sm font-medium text-gray-800 dark:text-gray-200 truncate" [title]="document.name">
+          {{ document.name }}
+        </p>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          {{ formatFileSize(document.size) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Download button -->
+    <div class="flex items-center ml-2">
+      <button 
+        mat-icon-button 
+        color="accent" 
+        (click)="onDownloadClick()"
+        [attr.aria-label]="'Tải xuống tài liệu ' + document.name"
+        matTooltip="Tải xuống">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,85 @@
+<div class="p-2 bg-white h-full w-full rounded-sm flex flex-col">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="ml-2 text-xl font-medium text-gray-800 m-0">Danh sách phát biểu</h2>
+    <button 
+    style="border-radius: 5px;"
+    mat-raised-button color="primary" class="shadow-sm" (click)="openRegisterDialog()">
+      <mat-icon class="mr-2">add</mat-icon>
+      Đăng ký phát biểu
+    </button>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="flex justify-center items-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && speechRegistrations.length === 0" class="text-center py-8 text-gray-500">
+    Chưa có đăng ký phát biểu nào
+  </div>
+
+  <!-- List of registrations -->
+  <div *ngIf="!loading && speechRegistrations.length > 0" 
+       class="space-y-4 overflow-y-auto pr-2 [&::-webkit-scrollbar]:w-1
+       [&::-webkit-scrollbar-track]:rounded-full
+       [&::-webkit-scrollbar-track]:bg-gray-100
+       [&::-webkit-scrollbar-thumb]:rounded-full
+       [&::-webkit-scrollbar-thumb]:bg-gray-400">
+    <div *ngFor="let registration of speechRegistrations" 
+         class="border border-gray-200 shadow-sm bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+      <div class="flex justify-between items-start mb-2">   
+        <div class="flex items-center gap-4">
+          <div class="flex items-center">
+            <span class="font-medium text-gray-900">{{registration.speakerFullName}}</span>
+            <span [class]="'ml-2 px-2 py-1 rounded-full text-xs font-medium ' + getStatusColor(registration.status)">
+              {{registration.status}}
+            </span>
+          </div>
+          <div class="flex items-center text-sm text-gray-500">
+            <mat-icon class="text-gray-400 mr-1" style="font-size: 16px; width: 16px; height: 16px;">schedule</mat-icon>
+            <span>{{registration.duration}} phút</span>
+          </div>
+        </div>
+        <span class="text-sm text-gray-500">{{formatDate(registration.createdAt)}}</span>
+      </div>
+      
+      <div class="flex items-center">
+        <p class="text-gray-700 w-[70%] line-clamp-2 cursor-help" 
+          [matTooltip]="registration.content"
+          matTooltipPosition="above"
+          matTooltipClass="custom-tooltip">
+          {{registration.content}}
+        </p>
+
+        <!-- Các nút điều khiển cho HOST -->
+        <div *ngIf="isHost" class="w-[30%] flex gap-2 mt-2 items-center justify-end">
+          <!-- Nút cho trạng thái PENDING -->
+          <ng-container *ngIf="registration.status === 'PENDING'">
+            <button mat-icon-button color="primary" matTooltip="Duyệt" (click)="approveSpeech(registration.id)">
+              <mat-icon>check_circle</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Từ chối" (click)="rejectSpeech(registration.id)">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </ng-container>
+
+          <!-- Nút cho trạng thái APPROVED -->
+          <ng-container *ngIf="registration.status === 'APPROVED'">
+            <button mat-icon-button color="primary" matTooltip="Bắt đầu phát biểu" (click)="startSpeech(registration.id)">
+              <mat-icon>play_circle</mat-icon>
+            </button>
+          </ng-container>
+
+          <!-- Nút cho trạng thái ON_GOING -->
+          <ng-container *ngIf="registration.status === 'ON_GOING'">
+            <button mat-icon-button color="warn" matTooltip="Kết thúc phát biểu" (click)="endSpeech(registration.id)">
+              <mat-icon>stop_circle</mat-icon>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
