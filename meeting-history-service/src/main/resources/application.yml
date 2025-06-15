@@ -9,4 +9,4 @@ spring:
 
 vdt:
   services:
-    meeting: ${gateway-url}/api/meeting
+    meeting: ${gateway-url}/meeting

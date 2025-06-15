@@ -9,6 +9,6 @@ spring:
 
 vdt:
   services:
-    meeting: ${gateway-url}/api/meeting
-    document: ${gateway-url}/api/document
-    user: ${gateway-url}/api/user
+    meeting: ${gateway-url}/meeting
+    document: ${gateway-url}/document
+    user: ${gateway-url}/user

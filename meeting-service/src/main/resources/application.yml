@@ -12,5 +12,5 @@ cors:
 
 vdt:
   services:
-    user: ${gateway-url}/api/user
-    document: ${gateway-url}/api/document
+    user: ${gateway-url}/user
+    document: ${gateway-url}/document

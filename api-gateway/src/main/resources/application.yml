@@ -13,31 +13,45 @@ spring:
         - id: meeting-service
           uri: lb://meeting-service
           predicates:
-            - Path=/api/meeting/**
+            - Path=/meeting/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/api/user/**
+            - Path=/user/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
         - id: document-service
           uri: lb://document-service
           predicates:
-            - Path=/api/document/**
+            - Path=/document/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
         - id: meeting-history-ws
           uri: lb:ws://meeting-history-service
           predicates:
-            - Path=/api/meeting-history/ws/**
+            - Path=/meeting-history/ws/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
         - id: meeting-history-service
           uri: lb://meeting-history-service
           predicates:
-            - Path=/api/meeting-history/**
+            - Path=/meeting-history/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
         - id: vote-service
           uri: lb://vote-service
           predicates:
-            - Path=/api/vote/**
+            - Path=/vote/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
         - id: speech-service
           uri: lb://speech-service
           predicates:
-            - Path=/api/speech/**
+            - Path=/speech/**
+          filters:
+            - RewritePath=/(?<segment>.*), /api/${segment}
   main:
     web-application-type: reactive
 
