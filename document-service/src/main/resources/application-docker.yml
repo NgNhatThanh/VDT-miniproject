@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/document
+    url: jdbc:postgresql://postgres:5432/document
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver
@@ -8,12 +8,12 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://identity.vdt.io.vn/realms/VDT
+          issuer-uri: http://keycloak:8080/realms/VDT
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: document-service
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka:8761/eureka/
 

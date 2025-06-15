@@ -1,8 +1,85 @@
 services:
 
-  api-gateway:
-    build: ./api-gateway
-
+#  eureka:
+#    build:
+#      context: .
+#      dockerfile: service-discovery/Dockerfile
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - qlch-network
+#
+#  api-gateway:
+#    build:
+#      context: .
+#      dockerfile: api-gateway/Dockerfile
+#    ports:
+#      - "9090:9090"
+#    networks:
+#      - qlch-network
+#
+#  vote-service:
+#    build:
+#      context: .
+#      dockerfile: vote-service/Dockerfile
+#    ports:
+#      - "8085:8085"
+#    networks:
+#      - qlch-network
+#
+#  meeting-service:
+#    build:
+#      context: .
+#      dockerfile: meeting-service/Dockerfile
+#    ports:
+#      - "8081:8081"
+#    networks:
+#      - qlch-network
+#
+#  document-service:
+#    build:
+#      context: .
+#      dockerfile: document-service/Dockerfile
+#    ports:
+#      - "8083:8083"
+#    networks:
+#      - qlch-network
+#
+#  meeting-history-service:
+#    build:
+#      context: .
+#      dockerfile: meeting-history-service/Dockerfile
+#    ports:
+#      - "8084:8084"
+#    networks:
+#      - qlch-network
+#
+#  speech-service:
+#    build:
+#      context: .
+#      dockerfile: speech-service/Dockerfile
+#    ports:
+#      - "8086:8086"
+#    networks:
+#      - qlch-network
+#
+#  user-service:
+#    build:
+#      context: .
+#      dockerfile: user-service/Dockerfile
+#    ports:
+#      - "8082:8082"
+#    networks:
+#      - qlch-network
+#
+#  frontend:
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    ports:
+#      - "4200:4200"
+#    networks:
+#      - qlch-network
 
   postgres:
     image: postgres:16-alpine

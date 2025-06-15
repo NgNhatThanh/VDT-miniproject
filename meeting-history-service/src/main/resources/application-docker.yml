@@ -1,17 +1,17 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/meeting
+    url: jdbc:postgresql://postgres:5432/meeting_history
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     producer:
-      acks: 1 # 0 / 1 / all
+      acks: 1
       retries: 3
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -19,19 +19,19 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "org.vdt.commonlib.dto"
+        spring.json.trusted.packages: "org.vdt.commonlib.dto, org.vdt.qlch.meetinghistoryservice.model"
+      auto-offset-reset: latest
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://identity.vdt.io.vn/realms/VDT
+          issuer-uri: http://keycloak:8080/realms/VDT
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: meeting-history-service
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka:8761/eureka/
 
-
-gateway-url: http://localhost:9090
+gateway-url: http://api-gateway:9090

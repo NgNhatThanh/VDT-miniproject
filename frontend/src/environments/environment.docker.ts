@@ -1,5 +1,5 @@
 export const environment = {
     production: false,
-    apiBaseUrl: 'http://localhost:9090/api',
+    apiBaseUrl: 'http://host.docker.internal:9090/api',
     keycloakUrl: 'http://localhost:9095'
-}; 
+};

@@ -3,21 +3,21 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://identity.vdt.io.vn/realms/VDT
+          issuer-uri: http://postgres:9095/realms/VDT
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: user-service
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://eureka:8761/eureka/
 
 keycloak:
-  auth-server-url: http://localhost:9095
+  auth-server-url: http://keycloak:8080
   realm: VDT
   resource: user-management # client-id
   credentials:
