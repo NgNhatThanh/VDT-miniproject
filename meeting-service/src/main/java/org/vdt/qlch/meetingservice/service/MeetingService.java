@@ -14,6 +14,7 @@ import org.vdt.commonlib.exception.BadRequestException;
 import org.vdt.commonlib.model.MeetingHistoryType;
 import org.vdt.commonlib.utils.AuthenticationUtil;
 import org.vdt.commonlib.utils.JwtUtil;
+import org.vdt.commonlib.utils.ScheduleUtil;
 import org.vdt.qlch.meetingservice.dto.redis.OnlineUserDTO;
 import org.vdt.qlch.meetingservice.dto.request.*;
 import org.vdt.qlch.meetingservice.dto.request.JoinDTO;
@@ -55,6 +56,8 @@ public class MeetingService {
     private final MeetingRedisService meetingRedisService;
 
     private final MeetingHistoryProducer historyProducer;
+
+    private final ScheduleUtil scheduleUtil;
 
     @Transactional
     public MeetingDTO createMeeting(@Valid CreateMeetingDTO dto) {
@@ -129,6 +132,12 @@ public class MeetingService {
                     .toList();
             meetingDocumentRepository.saveAll(documents);
         }
+        scheduleUtil.scheduleTask(meeting.getEndTime(), () ->
+                historyProducer.send(MeetingHistoryMessage.builder()
+                                .meetingId(meeting.getId())
+                                .type(MeetingHistoryType.MEETING_ENDED)
+                                .content("Cuộc họp đã kết thúc")
+                        .build()));
         return MeetingDTO.from(meeting);
     }
 
