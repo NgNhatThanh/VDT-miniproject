@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { map, catchError, filter } from 'rxjs/operators';
 import { KeycloakService } from './keycloak/keycloak.service';
+import { environment } from '../../environments/environment';
 
 export interface MeetingResponse {
   joinId: number;
@@ -60,8 +61,8 @@ export interface DocumentResponse {
   providedIn: 'root'
 })
 export class MeetingService {
-  private baseUrl = 'http://localhost:9090/api/meeting';
-  private apiUrl = 'http://localhost:9090/api';
+  private baseUrl = `${environment.apiBaseUrl}/meeting`;
+  private apiUrl = environment.apiBaseUrl;
   private meetingCache: Map<string, MeetingDetails> = new Map();
   public lastRejectReason: string | null = null;
   private currentMeetingSubject = new BehaviorSubject<MeetingDetails | null>(null);

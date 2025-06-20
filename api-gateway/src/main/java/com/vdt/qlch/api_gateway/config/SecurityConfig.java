@@ -26,6 +26,7 @@ public class SecurityConfig {
         return http
                 .authorizeExchange(auth ->
                         auth
+                                .pathMatchers("/meeting-history/ws/**").permitAll()
                                 .pathMatchers("/api/meeting-history/ws/**").permitAll()
                                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .anyExchange().authenticated())

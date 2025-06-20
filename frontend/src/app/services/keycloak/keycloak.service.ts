@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import Keycloak from 'keycloak-js';
 import { UserProfile } from './user-profile';
+import { environment } from '../../../environments/environment';
+import { jwtDecode } from 'jwt-decode';
 
 interface TokenPayload {
   realm_access: {
@@ -20,7 +22,7 @@ export class KeycloakService {
   get keycloak(){
     if(!this._keycloak){
       this._keycloak = new Keycloak({
-        url: 'http://localhost:9095',
+        url: environment.keycloakUrl,
         realm: 'VDT',
         clientId: 'quanlycuochop'
       })
@@ -67,7 +69,7 @@ export class KeycloakService {
     }
     
     try {
-      const tokenPayload = JSON.parse(atob(this.keycloak.token.split('.')[1])) as TokenPayload;
+      const tokenPayload = jwtDecode<TokenPayload>(this.keycloak.token);
       return tokenPayload.realm_access?.roles || [];
     } catch (error) {
       console.error('Error parsing token:', error);

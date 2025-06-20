@@ -34,6 +34,8 @@ public class CustomHandshakeInterceptor implements HandshakeInterceptor {
             }
             return true;
         }
+        System.out.println("Token: " + token);
+        System.out.println("MeetingId: " + meetingId);
         return false;
     }
 

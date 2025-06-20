@@ -4,7 +4,7 @@ import { Observable, Subject, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { KeycloakService } from './keycloak/keycloak.service';
 import { filter, tap } from 'rxjs/operators';
-import * as Stomp from 'stompjs';
+import { Client, Message, StompSubscription } from '@stomp/stompjs';
 
 export interface Note {
   id: number;
@@ -223,7 +223,7 @@ export interface UpdateDocumentStatusRequest {
   providedIn: 'root'
 })
 export class MeetingManagementService {
-  private apiUrl = `http://localhost:9090/api`;
+  private apiUrl = environment.apiBaseUrl;
   private currentMeetingJoinInfo: MeetingJoinResponse | null = null;
   private meetingJoinStatus = new BehaviorSubject<boolean>(false);
   public meetingJoinStatus$ = this.meetingJoinStatus.asObservable();
@@ -233,11 +233,12 @@ export class MeetingManagementService {
   public meetingInfo$ = this.meetingInfo.asObservable();
 
   // STOMP Client
-  private stompClient: Stomp.Client | null = null;
+  private stompClient: Client | null = null;
   private connected = new BehaviorSubject<boolean>(false);
   public connected$ = this.connected.asObservable();
   private messageSubject = new Subject<any>();
   public message$ = this.messageSubject.asObservable();
+  private subscription: StompSubscription | null = null;
 
   // Latest history message
   private latestHistoryMessage = new BehaviorSubject<MeetingHistory | null>(null);
@@ -300,7 +301,7 @@ export class MeetingManagementService {
 
   // Kiểm tra quyền tham gia meeting
   checkMeetingJoinPermission(meetingId: number): Observable<MeetingJoinResponse> {
-    const url = `http://localhost:9090/api/meeting/join?meetingId=${meetingId}`;
+    const url = `${this.apiUrl}/meeting/join?meetingId=${meetingId}`;
     return this.http.get<MeetingJoinResponse>(url).pipe(
       tap(response => {
         if (!this.currentMeetingJoinInfo) {
@@ -332,7 +333,7 @@ export class MeetingManagementService {
 
   // Lấy thông tin header của cuộc họp
   getMeetingHeaderInfo(meetingId: number): Observable<MeetingHeaderInfo> {
-    return this.http.get<MeetingHeaderInfo>(`http://localhost:9090/api/meeting/header-info?meetingId=${meetingId}`).pipe(
+    return this.http.get<MeetingHeaderInfo>(`${this.apiUrl}/meeting/header-info?meetingId=${meetingId}`).pipe(
       tap(info => {
         this.meetingInfo.next(info);
       })
@@ -341,7 +342,7 @@ export class MeetingManagementService {
 
   // Lấy lịch sử cuộc họp
   getMeetingHistories(meetingId: number, limit: number = 10, offset: number = 0): Observable<MeetingHistory[]> {
-    const url = `http://localhost:9090/api/meeting-history/get-histories?meetingId=${meetingId}&limit=${limit}&offset=${offset}`;
+    const url = `${this.apiUrl}/meeting-history/get-histories?meetingId=${meetingId}&limit=${limit}&offset=${offset}`;
     return this.http.get<MeetingHistory[]>(url);
   }
 
@@ -352,17 +353,29 @@ export class MeetingManagementService {
     }
 
     const token = this.keycloakService.keycloak.token;
-    this.stompClient = Stomp.client(`http://localhost:9090/api/meeting-history/ws?token=${token}&meetingId=${meetingId}`)
-    this.stompClient.connect(
-      { login: '', passcode: '' },
-      (frame?: Stomp.Frame) => {
-        console.log('Connected to STOMP');
-        this.connected.next(true);
-        
-        // Subscribe to meeting history
-        this.stompClient?.subscribe(
+    this.stompClient = new Client({
+      brokerURL: `${this.apiUrl}/meeting-history/ws?token=${token}&meetingId=${meetingId}`,
+      connectHeaders: {
+        login: '',
+        passcode: ''
+      },
+      debug: function (str) {
+        console.log(str);
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000
+    });
+
+    this.stompClient.onConnect = (frame) => {
+      console.log('Connected to STOMP');
+      this.connected.next(true);
+      
+      // Subscribe to meeting history
+      if (this.stompClient) {
+        this.subscription = this.stompClient.subscribe(
           `/meeting/${meetingId}/history`,
-          (message: Stomp.Message) => {
+          (message: Message) => {
             try {
               const data = JSON.parse(message.body);
               console.log(data);
@@ -374,21 +387,29 @@ export class MeetingManagementService {
             }
           }
         );
-      },
-      (error: string | Stomp.Frame) => {
-        console.error('STOMP error:', error);
-        this.messageSubject.next({
-          type: 'ERROR',
-          message: 'Không thể xác thực kết nối. Vui lòng đăng nhập lại.'
-        });
-        this.disconnectWebsocket();
       }
-    );
+    };
+
+    this.stompClient.onStompError = (frame) => {
+      console.error('STOMP error:', frame);
+      this.messageSubject.next({
+        type: 'ERROR',
+        message: 'Không thể xác thực kết nối. Vui lòng đăng nhập lại.'
+      });
+      this.disconnectWebsocket();
+    };
+
+    this.stompClient.activate();
   }
 
   disconnectWebsocket() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
+    }
+    
     if (this.stompClient) {
-      this.stompClient.disconnect(() => {
+      this.stompClient.deactivate().then(() => {
         console.log('Disconnected from STOMP');
         this.connected.next(false);
       });
@@ -398,7 +419,10 @@ export class MeetingManagementService {
 
   sendWebsocketMessage(msg: any) {
     if (this.stompClient && this.connected.value) {
-      this.stompClient.send('/app/meeting-history', {}, JSON.stringify(msg));
+      this.stompClient.publish({
+        destination: '/app/meeting-history',
+        body: JSON.stringify(msg)
+      });
     }
   }
 
@@ -437,62 +461,62 @@ export class MeetingManagementService {
 
   // Tạo biểu quyết mới
   createVoting(voting: CreateVotingRequest): Observable<any> {
-    return this.http.post('http://localhost:9090/api/vote/create-vote', voting);
+    return this.http.post(`${this.apiUrl}/vote/create-vote`, voting);
   }
 
   // Lấy danh sách biểu quyết của một cuộc họp
   getVotingList(meetingId: number): Observable<VotingInfo[]> {
-    return this.http.get<VotingInfo[]>(`http://localhost:9090/api/vote/get-list?meetingId=${meetingId}`);
+    return this.http.get<VotingInfo[]>(`${this.apiUrl}/vote/get-list?meetingId=${meetingId}`);
   }
 
   // Lấy thông tin chi tiết biểu quyết để bỏ phiếu
   getVoteForSelection(meetingVoteId: number): Observable<VoteDetail> {
-    return this.http.get<VoteDetail>(`http://localhost:9090/api/vote/get-vote-for-selection?meetingVoteId=${meetingVoteId}`);
+    return this.http.get<VoteDetail>(`${this.apiUrl}/vote/get-vote-for-selection?meetingVoteId=${meetingVoteId}`);
   }
 
   // Gửi phiếu bầu
   submitVote(request: SubmitVoteRequest): Observable<any> {
-    return this.http.post('http://localhost:9090/api/vote/vote', request);
+    return this.http.post(`${this.apiUrl}/vote/vote`, request);
   }
 
   // Lấy thông tin trạng thái biểu quyết
   getVoteStatus(meetingVoteId: number): Observable<VoteStatusResponse> {
-    return this.http.get<VoteStatusResponse>(`http://localhost:9090/api/vote/status?meetingVoteId=${meetingVoteId}`);
+    return this.http.get<VoteStatusResponse>(`${this.apiUrl}/vote/status?meetingVoteId=${meetingVoteId}`);
   }
 
   // Đăng ký phát biểu
   registerSpeech(request: RegisterSpeechRequest): Observable<any> {
-    return this.http.post('http://localhost:9090/api/speech/register', request);
+    return this.http.post(`${this.apiUrl}/speech/register`, request);
   }
 
   // Lấy danh sách đăng ký phát biểu
   getSpeechRegistrations(meetingId: number): Observable<SpeechRegistration[]> {
-    return this.http.get<SpeechRegistration[]>(`http://localhost:9090/api/speech/get-list?meetingId=${meetingId}`);
+    return this.http.get<SpeechRegistration[]>(`${this.apiUrl}/speech/get-list?meetingId=${meetingId}`);
   }
 
   // Cập nhật trạng thái phát biểu
   updateSpeechStatus(request: UpdateSpeechStatusRequest): Observable<any> {
-    return this.http.post('http://localhost:9090/api/speech/update', request);
+    return this.http.post(`${this.apiUrl}/speech/update`, request);
   }
 
   // Lấy danh sách tài liệu của cuộc họp
   getMeetingDocuments(meetingId: number): Observable<MeetingDocument[]> {
-    return this.http.get<MeetingDocument[]>(`http://localhost:9090/api/meeting/document/get-list?meetingId=${meetingId}`);
+    return this.http.get<MeetingDocument[]>(`${this.apiUrl}/meeting/document/get-list?meetingId=${meetingId}`);
   }
 
   // Thêm tài liệu vào cuộc họp
   addDocumentToMeeting(meetingId: number, documentId: number): Observable<any> {
-    return this.http.post(`http://localhost:9090/api/meeting/document/add-to-meeting?meetingId=${meetingId}&documentId=${documentId}`, {});
+    return this.http.post(`${this.apiUrl}/meeting/document/add-to-meeting?meetingId=${meetingId}&documentId=${documentId}`, {});
   }
 
   // Lấy danh sách tài liệu cần duyệt
   getDocumentsForApproval(meetingId: number): Observable<DocumentForApproval[]> {
-    return this.http.get<DocumentForApproval[]>(`http://localhost:9090/api/meeting/document/get-for-approvement?meetingId=${meetingId}`);
+    return this.http.get<DocumentForApproval[]>(`${this.apiUrl}/meeting/document/get-for-approvement?meetingId=${meetingId}`);
   }
 
   // Cập nhật trạng thái tài liệu
   updateDocumentStatus(request: UpdateDocumentStatusRequest): Observable<any> {
-    return this.http.post('http://localhost:9090/api/meeting/document/update-status', request);
+    return this.http.post(`${this.apiUrl}/meeting/document/update-status`, request);
   }
 
   getListNote(meetingId: number): Observable<Note[]> {
@@ -519,6 +543,6 @@ export class MeetingManagementService {
 
   // Lấy danh sách người tham gia cuộc họp
   getParticipants(meetingId: number): Observable<Participant[]> {
-    return this.http.get<Participant[]>(`http://localhost:9090/api/meeting/get-list-participants?meetingId=${meetingId}`);
+    return this.http.get<Participant[]>(`${this.apiUrl}/meeting/get-list-participants?meetingId=${meetingId}`);
   }
 } 

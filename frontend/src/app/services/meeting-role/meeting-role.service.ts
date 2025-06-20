@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class MeetingRoleService {
-  private apiUrl = `${environment.apiUrl}/meeting/role`;
+  private apiUrl = `${environment.apiBaseUrl}/meeting/role`;
 
   constructor(private http: HttpClient) { }
 
