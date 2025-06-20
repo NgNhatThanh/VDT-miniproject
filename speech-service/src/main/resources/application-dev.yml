@@ -20,7 +20,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://identity.vdt.io.vn/realms/VDT
+          issuer-uri: http://localhost:9095/realms/VDT
 
 eureka:
   instance:

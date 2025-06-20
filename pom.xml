@@ -7,7 +7,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.0</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>org.vdt</groupId>
@@ -16,7 +16,6 @@
     <packaging>pom</packaging>
     <name>Meeting Management Platform</name>
 
-    <!-- Shared properties for all modules -->
     <properties>
         <java.version>21</java.version>
         <spring.boot.version>3.5.0</spring.boot.version>
@@ -38,7 +37,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Quản lý phiên bản Spring Boot cho tất cả service -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -58,7 +56,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Plugin chung cho Java build -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -74,13 +71,6 @@
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
-                </plugin>
-
-                <!-- Plugin để build fat jar nếu cần -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.3.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

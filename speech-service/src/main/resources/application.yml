@@ -9,4 +9,4 @@ spring:
 
 vdt:
   services:
-    user: ${gateway-url}/user
+    user: ${gateway-url}/api/user

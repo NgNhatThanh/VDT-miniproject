@@ -3,7 +3,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://postgres:9095/realms/VDT
+          issuer-uri: http://keycloak:8080/realms/VDT
   data:
     redis:
       host: redis

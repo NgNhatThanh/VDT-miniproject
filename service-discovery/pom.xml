@@ -10,6 +10,7 @@
 		<groupId>org.vdt</groupId>
 		<artifactId>qlch</artifactId>
 		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<groupId>org.vdt.qlch</groupId>
 	<artifactId>service-discovery</artifactId>

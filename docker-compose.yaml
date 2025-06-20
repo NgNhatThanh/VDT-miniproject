@@ -1,85 +1,97 @@
 services:
 
-#  eureka:
-#    build:
-#      context: .
-#      dockerfile: service-discovery/Dockerfile
-#    ports:
-#      - "8761:8761"
-#    networks:
-#      - qlch-network
-#
-#  api-gateway:
-#    build:
-#      context: .
-#      dockerfile: api-gateway/Dockerfile
-#    ports:
-#      - "9090:9090"
-#    networks:
-#      - qlch-network
-#
-#  vote-service:
-#    build:
-#      context: .
-#      dockerfile: vote-service/Dockerfile
-#    ports:
-#      - "8085:8085"
-#    networks:
-#      - qlch-network
-#
-#  meeting-service:
-#    build:
-#      context: .
-#      dockerfile: meeting-service/Dockerfile
-#    ports:
-#      - "8081:8081"
-#    networks:
-#      - qlch-network
-#
-#  document-service:
-#    build:
-#      context: .
-#      dockerfile: document-service/Dockerfile
-#    ports:
-#      - "8083:8083"
-#    networks:
-#      - qlch-network
-#
-#  meeting-history-service:
-#    build:
-#      context: .
-#      dockerfile: meeting-history-service/Dockerfile
-#    ports:
-#      - "8084:8084"
-#    networks:
-#      - qlch-network
-#
-#  speech-service:
-#    build:
-#      context: .
-#      dockerfile: speech-service/Dockerfile
-#    ports:
-#      - "8086:8086"
-#    networks:
-#      - qlch-network
-#
-#  user-service:
-#    build:
-#      context: .
-#      dockerfile: user-service/Dockerfile
-#    ports:
-#      - "8082:8082"
-#    networks:
-#      - qlch-network
-#
-#  frontend:
-#    build:
-#      context: ./frontend
-#      dockerfile: Dockerfile
-#    ports:
-#      - "4200:4200"
-#    networks:
-#      - qlch-network
+  eureka:
+    build: ./service-discovery
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/service-discovery:latest
+    ports:
+      - "8761:8761"
+    environment:
+      - TZ
+    networks:
+      - qlch-network
+
+  api-gateway:
+    build: ./api-gateway
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/api-gateway:latest
+    ports:
+      - "9090:9090"
+    environment:
+      - TZ
+    networks:
+      - qlch-network
+
+  vote-service:
+    build: ./vote-service
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/vote-service:latest
+    ports:
+      - "8085:8085"
+    environment:
+      - TZ
+    restart: on-failure
+    networks:
+      - qlch-network
+
+  meeting-service:
+    build: ./meeting-service
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/meeting-service:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - TZ
+    restart: on-failure
+    networks:
+      - qlch-network
+
+  document-service:
+    build: ./document-service
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/document-service:latest
+    environment:
+      - CLOUDINARY_URL
+      - TZ
+    ports:
+      - "8083:8083"
+    restart: on-failure
+    networks:
+      - qlch-network
+
+  meeting-history-service:
+    build: ./meeting-history-service
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/meeting-history-service:latest
+    ports:
+      - "8084:8084"
+    environment:
+      - TZ
+    restart: on-failure
+    networks:
+      - qlch-network
+
+  speech-service:
+    build: ./speech-service
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/speech-service:latest
+    ports:
+      - "8086:8086"
+    environment:
+      - TZ
+    restart: on-failure
+    networks:
+      - qlch-network
+
+  user-service:
+    build: ./user-service
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/user-service:latest
+    ports:
+      - "8082:8082"
+    environment:
+      - TZ
+    networks:
+      - qlch-network
+
+  frontend:
+    image: ghcr.io/ngnhatthanh/vdt-miniproject/frontend:latest
+    ports:
+      - "4200:4200"
+    networks:
+      - qlch-network
 
   postgres:
     image: postgres:16-alpine
@@ -109,9 +121,8 @@ services:
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: admin
     ports:
-      - "9095:8080"
+      - "8080:8080"
     volumes:
-#      - ./identity/theme:/opt/keycloak/themes
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
     depends_on:
       - postgres
@@ -154,17 +165,17 @@ services:
     networks:
       - qlch-network
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    ports:
-      - 8095:8080
-    depends_on:
-      - kafka
-    networks:
-      - qlch-network
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:latest
+#    environment:
+#      DYNAMIC_CONFIG_ENABLED: 'true'
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+#    ports:
+#      - 8095:8080
+#    depends_on:
+#      - kafka
+#    networks:
+#      - qlch-network
 
   redis:
     image: redis
@@ -175,14 +186,14 @@ services:
     networks:
       - qlch-network
 
-  redis-gui:
-    depends_on:
-      - redis
-    image: redis/redisinsight
-    ports:
-      - 5540:5540
-    networks:
-      - qlch-network
+#  redis-gui:
+#    depends_on:
+#      - redis
+#    image: redis/redisinsight
+#    ports:
+#      - 5540:5540
+#    networks:
+#      - qlch-network
 
 networks:
   qlch-network:

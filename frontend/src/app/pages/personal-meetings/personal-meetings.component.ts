@@ -57,12 +57,12 @@ export class PersonalMeetingsComponent implements OnInit {
       displayText: 'Không tham gia',
       cssClass: 'bg-red-100 text-red-700'
     },
-    {
-      value: 'DELEGATED',
-      label: 'Đã ủy quyền',
-      displayText: 'Đã ủy quyền',
-      cssClass: 'bg-blue-100 text-blue-700'
-    }
+    // {
+    //   value: 'DELEGATED',
+    //   label: 'Đã ủy quyền',
+    //   displayText: 'Đã ủy quyền',
+    //   cssClass: 'bg-blue-100 text-blue-700'
+    // }
   ];
 
   constructor(private meetingService: MeetingService) {}
@@ -76,10 +76,10 @@ export class PersonalMeetingsComponent implements OnInit {
     const today = new Date(this.currentDate);
     const dayOfWeek = today.getDay();
     const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-    
+
     this.weekStart = new Date(today.setDate(diff));
     this.weekEnd = new Date(today.setDate(diff + 6));
-    
+
     this.weekDays = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(this.weekStart);

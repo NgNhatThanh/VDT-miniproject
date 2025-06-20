@@ -42,7 +42,7 @@ create table meeting_locations
     name        varchar(100) not null,
     description varchar      not null,
      created_at  timestamp default current_timestamp,
-     created_by  varchar      not null,
+     created_by  varchar     ,
      updated_at  timestamp,
      updated_by varchar
 );
@@ -158,7 +158,14 @@ create table meeting_documents
     updated_by  varchar
 );
 
-insert into meeting_roles(name) values ('GUEST'), ('SECRETARY'), ('PARTICIPANT'), ('DOCUMENT_APPROVER') , ('HOST');
+insert into meeting_roles(name) values ('GUEST'),
+                                       ('SECRETARY'),
+                                       ('PARTICIPANT'),
+                                       ('DOCUMENT_APPROVER') ,
+                                       ('HOST');
+insert into meeting_locations(name, description) values ('Phong 1', 'Tang 1'),
+                                                        ('Phong 2', 'Tang 2'),
+                                                        ('Phong 3', 'Tang 3');
 
 \c document
 

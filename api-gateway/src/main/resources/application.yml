@@ -9,49 +9,37 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   cloud:
     gateway:
-      routes:
-        - id: meeting-service
-          uri: lb://meeting-service
-          predicates:
-            - Path=/meeting/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/user/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
-        - id: document-service
-          uri: lb://document-service
-          predicates:
-            - Path=/document/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
-        - id: meeting-history-ws
-          uri: lb:ws://meeting-history-service
-          predicates:
-            - Path=/meeting-history/ws/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
-        - id: meeting-history-service
-          uri: lb://meeting-history-service
-          predicates:
-            - Path=/meeting-history/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
-        - id: vote-service
-          uri: lb://vote-service
-          predicates:
-            - Path=/vote/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
-        - id: speech-service
-          uri: lb://speech-service
-          predicates:
-            - Path=/speech/**
-          filters:
-            - RewritePath=/(?<segment>.*), /api/${segment}
+      server:
+        webflux:
+          routes:
+          - id: meeting-service
+            uri: lb://meeting-service
+            predicates:
+              - Path=/api/meeting/**
+          - id: user-service
+            uri: lb://user-service
+            predicates:
+              - Path=/api/user/**
+          - id: document-service
+            uri: lb://document-service
+            predicates:
+              - Path=/api/document/**
+          - id: meeting-history-ws
+            uri: lb:ws://meeting-history-service
+            predicates:
+              - Path=/api/meeting-history/ws/**
+          - id: meeting-history-service
+            uri: lb://meeting-history-service
+            predicates:
+              - Path=/api/meeting-history/**
+          - id: vote-service
+            uri: lb://vote-service
+            predicates:
+              - Path=/api/vote/**
+          - id: speech-service
+            uri: lb://speech-service
+            predicates:
+              - Path=/api/speech/**
   main:
     web-application-type: reactive
 
