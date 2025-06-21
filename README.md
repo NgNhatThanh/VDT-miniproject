@@ -56,7 +56,7 @@ A meeting schedule / management (No RTC) project aim to practice building a typi
 
 ## Contributing
 
-- Give us a star
+- Give me a star
 
 - Reporting a bug
 
@@ -64,7 +64,7 @@ A meeting schedule / management (No RTC) project aim to practice building a typi
 
 - Propose new features
 
-- Submit pull requests. If you are new to GitHub, consider to learn how to contribute to a project through forking
+- Submit pull requests. If you are new to GitHub, consider to [learn how to contribute to a project through forking](https://docs.github.com/en/get-started/quickstart/contributing-to-projects)
 
 By contributing, you agree that your contributions will be licensed under MIT License.
 ## Screenshots
