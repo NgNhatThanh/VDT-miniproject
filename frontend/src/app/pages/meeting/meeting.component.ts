@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MeetingManagementService, MeetingJoinResponse } from '../../services/meeting-management.service';
+import { MeetingManagementService, MeetingJoinResponse, MeetingHistory } from '../../services/meeting-management.service';
 import { HeaderComponent } from './header/header.component';
 import { ManageSectionComponent } from './manage-section/manage-section.component';
 import { HistorySectionComponent } from './history-section/history-section.component';
 import { DocumentSectionComponent } from './document-section/document-section.component';
 import { SpeechSectionComponent } from './speech-section/speech-section.component';
 import { VoteSectionComponent } from './vote-section/vote-section.component';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-meeting',
@@ -20,7 +22,9 @@ import { VoteSectionComponent } from './vote-section/vote-section.component';
     VoteSectionComponent
   ]
 })
-export class MeetingComponent implements OnInit {
+export class MeetingComponent implements OnInit, OnDestroy {
+  private subscription = new Subscription();
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -34,6 +38,23 @@ export class MeetingComponent implements OnInit {
       const meetingId = params['meetingId'];
       this.checkMeetingPermission(meetingId);
     });
+
+    // Lắng nghe tin nhắn mới nhất
+    this.subscription.add(
+      this.meetingService.latestHistoryMessage$.pipe(
+        filter((message): message is MeetingHistory => 
+          message !== null && message.type === 'MEETING_ENDED'
+        )
+      ).subscribe(() => {
+        alert('Cuộc họp đã kết thúc!');
+        this.meetingService.resetMeetingJoinStatus();
+        window.location.assign('/');
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   private checkMeetingPermission(meetingId: number) {

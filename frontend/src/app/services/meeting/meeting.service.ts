@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface MeetingLocation {
   id: number;
@@ -46,23 +47,23 @@ export interface DocumentResponse {
   providedIn: 'root'
 })
 export class MeetingService {
-  private apiUrl = 'http://localhost:9090/api/meeting';
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
 
   getLocations(): Observable<MeetingLocation[]> {
-    return this.http.get<MeetingLocation[]>(`${this.apiUrl}/location/all`);
+    return this.http.get<MeetingLocation[]>(`${this.apiUrl}/meeting/location/all`);
   }
 
   addMeeting(meeting: CreateMeetingRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, meeting);
+    return this.http.post(`${this.apiUrl}/meeting/create`, meeting);
   }
 
   uploadDocument(file: File): Observable<DocumentResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this.http.post<DocumentResponse>(`http://localhost:9090/api/document/upload`, formData).pipe(
+    return this.http.post<DocumentResponse>(`${this.apiUrl}/document/upload`, formData).pipe(
       catchError(error => {
         console.error('Error uploading document:', error);
         throw error;

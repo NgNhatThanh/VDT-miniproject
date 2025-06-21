@@ -8,6 +8,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTreeModule } from '@angular/material/tree';
 import { RouterModule, Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 export interface SidebarMenuItem {
   label: string;
@@ -59,7 +60,7 @@ export class SidebarComponent implements OnInit {
         label: 'TÀI KHOẢN CỦA TÔI',
         children: [
           { label: 'Đăng xuất', icon: 'logout', onClick: () => this.kcService.logout() },
-          { label: 'Hồ sơ cá nhân', icon: 'person', onClick: () => window.open('http://localhost:9095/realms/VDT/account') }
+          { label: 'Hồ sơ cá nhân', icon: 'person', onClick: () => window.open(`${environment.keycloakUrl}/realms/VDT/account`) }
         ]
       }
     ];

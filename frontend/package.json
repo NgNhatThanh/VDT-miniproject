@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "build:docker": "ng build --configuration docker",
     "test": "ng test"
   },
   "private": true,
@@ -19,13 +20,14 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
+    "@stomp/stompjs": "^7.1.1",
     "@tailwindcss/postcss": "^4.1.7",
+    "jwt-decode": "^4.0.0",
     "keycloak-angular": "^19.0.2",
     "keycloak-js": "^26.1.5",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.0",
     "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3",
     "tailwindcss": "^4.1.7",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

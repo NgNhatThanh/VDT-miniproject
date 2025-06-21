@@ -1,0 +1,24 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/VDT
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+eureka:
+  instance:
+    hostname: user-service
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:8761/eureka/
+
+keycloak:
+  auth-server-url: http://keycloak:8080
+  realm: VDT
+  resource: user-management # client-id
+  credentials:
+    secret: p8o2LT7RdfZznZxtLJpYBDC3OyfngFrC

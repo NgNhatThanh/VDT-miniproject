@@ -1,5 +1,5 @@
 export const environment = {
     production: false,
     apiBaseUrl: 'http://localhost:9090/api',
-    keycloakUrl: 'http://localhost:9095'
+    keycloakUrl: 'http://keycloak:8080'
 };

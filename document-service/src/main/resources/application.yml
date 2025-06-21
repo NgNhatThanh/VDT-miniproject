@@ -12,7 +12,7 @@ spring:
       max-request-size: 5MB
 
 cloudinary:
-  url: cloudinary://737897558738675:GkGbBye3iOtvFfDz5FtjBqICqAQ@daxt0vwoc
+  url: ${CLOUDINARY_URL}
 
 cors:
   allowed-origins: '*'
